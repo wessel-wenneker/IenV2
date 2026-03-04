@@ -16,10 +16,63 @@ import os
 from read import ShipInputs
 
 class Tank:
+    """
+    Berekent alle benodigde waardes van een tank
+    
+    Parameters:
+    df_volume (df): 
+        tankeigenschappen bij verschillende vullingen
+    df_wp (df): 
+        eigenschappen van het wateroppervlak in een tank
+    water_density (int): 
+        waterdichtheid
+    boyant_volume (flt): 
+        drijvend volume
+    COV (arr):
+        lcg tcg en vcg van het onderwatervolume 
+        
+    Attributes:
+    volume_data (df): 
+        Kopie van df_volume, aangevuld met massa, lM en tM
+    waterplane_data (df): 
+        Kopie van df_wp, aangevuld met GG
+    meter (array): 
+            Vullingshoogte in meters.
+    percentage (array):
+        Vullingsgraad in procent van de tankhoogte
+    volume : array
+        Tankvolume per vullingshoogte
+    lcg, tcg, vcg : ndarray
+        Zwaartepuntcoördinaten per vullingshoogte
+    mass : array
+        Massa van de tankinhoud per vullingshoogte
+    lM : array
+        Longitudinaal moment m * (lcg - COV_x)
+    tM : array
+        Transversaal moment m * tcg
+    Ix : array
+        Waterlijntraagheidsmoment rond de x-as
+    GG : array
+        Metacentrische afstand GG = Ix / buoyant_volume
+
+    Attributes created by percentage_filled
+
+    exact_lM, exact_tM : float
+        Exacte longitudinale en transversale momenten bij gegeven vullingsgraad
+    exact_lcg, exact_tcg, exact_vcg : float
+        Exacte zwaartepuntcoördinaten bij gegeven vullingsgraad
+    exact_mass : float
+        Exacte massa bij gegeven vullingsgraad
+    exact_Ix : float
+        Exact waterlijntraagheidsmoment bij gegeven vullingsgraad
+    exact_GG : float
+        Exacte afstand bij gegeven vullingsgraad
+
+    """
     def __init__(self, df_volume, df_wp, water_density, buoyant_volume, COV):
         #data
         self.volume_data = df_volume.copy()
-        self.waterplane_data = df_wp.copy
+        self.waterplane_data = df_wp.copy()
         self.volume_data.columns = self.volume_data.columns.str.strip()
         self.waterplane_data.columns = self.waterplane_data.columns.str.strip()
         
@@ -52,28 +105,29 @@ class Tank:
         
 def deck(crane_position=None, TP_position=None, TP_mass=0, TP_amount=0, jib_length=None, jib_angle=0, slewing_angle=0): #positions(COG) = [x,y,z]
     """
-        
+        Berekent de massa en center of gravity van alles op het dek samen
+        voor de momentenstelling
 
         Parameters
         ----------
-        crane_position : TYPE, optional
-            DESCRIPTION. The default is None.
-        TP_position : TYPE, optional
-            DESCRIPTION. The default is None.
-        TP_mass : TYPE, optional
-            DESCRIPTION. The default is 0.
-        TP_amount : TYPE, optional
-            DESCRIPTION. The default is 0.
-        jib_length : TYPE, optional
-            DESCRIPTION. The default is None.
-        jib_angle : TYPE, optional
-            DESCRIPTION. The default is 0.
-        slewing_angle : TYPE, optional
-            DESCRIPTION. The default is 0.
+        crane_position : array
+            Kraanpositie. The default is None.
+        TP_position : array
+            Transition piece positie. The default is None.
+        TP_mass : float
+            Massa van 1 Transition piece. The default is 0.
+        TP_amount : int.
+            Aantal Transition pieces. The default is 0.
+        jib_length : float
+            float. The default is None.
+        jib_angle : float
+            float. The default is 0.
+        slewing_angle : float
+            float. The default is 0.
 
         Returns
         -------
-        None.
+        np.array([mass_deck, lcg_deck, tcg_deck, vcg_deck])
 
         """
     if crane_position is None or jib_length is None: 
@@ -120,22 +174,45 @@ def deck(crane_position=None, TP_position=None, TP_mass=0, TP_amount=0, jib_leng
     return np.array([mass_deck, lcg_deck, tcg_deck, vcg_deck])
 
 def plates(file, df_hull, df_BHD, hull_thickness, BHD_thickness, material_density, mass_factor): #file = [group, version, subversion]
-    hull_data = pd.read_csv(f'data/HullAreaData_Gr{file[0]}_V{file[1]}.{file[2]}.csv', delimiter=',', skiprows=1)
-    BHD_data = pd.read_csv(f'data/TankBHD_Data_Gr{file[0]}_V{file[1]}.{file[2]}.csv', delimiter=',', skiprows=1)
+    """
+    
 
+    Parameters
+    ----------
+    file : TYPE
+        list.
+    df_hull : TYPE
+        df.
+    df_BHD : TYPE
+        df.
+    hull_thickness : TYPE
+        df. [transom, shell, deck]
+    BHD_thickness : TYPE
+        float.
+    material_density : TYPE
+        Int.
+    mass_factor : TYPE
+        float.
+
+    Returns
+    -------
+    TYPE:array
+        np.array([mass_plates, lcg_plates, tcg_plates, vcg_plates])
+
+    """
     #hull
-    area_hull = hull_data['Area [m2]'].to_numpy()
-    lcg_hull = hull_data['lca [m]'].to_numpy()
-    tcg_hull = hull_data['tca [m]'].to_numpy()
-    vcg_hull = hull_data['vca [m]'].to_numpy()
+    area_hull = df_hull['Area [m2]'].to_numpy()
+    lcg_hull = df_hull['lca [m]'].to_numpy()
+    tcg_hull = df_hull['tca [m]'].to_numpy()
+    vcg_hull = df_hull['vca [m]'].to_numpy()
     volume_hull = area_hull*hull_thickness
     mass_hull = volume_hull*material_density*mass_factor
     
     #bulkheads
-    area_BHD = BHD_data['BHD Area [m2]'].to_numpy()
-    lcg_BHD = BHD_data['lcg [m]'].to_numpy()
-    tcg_BHD = BHD_data['tcg [m]'].to_numpy()
-    vcg_BHD = BHD_data['vcg [m]'].to_numpy()
+    area_BHD = df_BHD['BHD Area [m2]'].to_numpy()
+    lcg_BHD = df_BHD['lcg [m]'].to_numpy()
+    tcg_BHD = df_BHD['tcg [m]'].to_numpy()
+    vcg_BHD = df_BHD['vcg [m]'].to_numpy()
     volume_BHD = area_BHD*BHD_thickness
     mass_BHD = volume_BHD*material_density*mass_factor
     
@@ -147,6 +224,22 @@ def plates(file, df_hull, df_BHD, hull_thickness, BHD_thickness, material_densit
     return np.array([mass_plates, lcg_plates, tcg_plates, vcg_plates])
 
 def resistance(file, design_speed): #speed in knots
+    """
+    Leest en berekent data van de weerstand en plot op aanvraag een grafiek
+
+    Parameters
+    ----------
+    file : TYPE
+        List.
+    design_speed : TYPE
+        float.
+
+    Returns
+    -------
+    design_resistance : TYPE
+        float.
+
+    """
     resistance_data = pd.read_csv(f'data/ResistanceData_Gr{file[0]}_V{file[1]}.{file[2]}.csv', delimiter=',', skiprows=5)
     speed = resistance_data['V [kn]'].to_numpy()[:11]
     resistance = resistance_data['  Rtot [N]'].to_numpy()[:11]/1000
@@ -158,6 +251,22 @@ def resistance(file, design_speed): #speed in knots
     return design_resistance
 
 def ZCG(mass_list, zcg_list):
+    """
+    Berekent transverse, longitudonal of vertical center of gravity van het gehele schip
+
+    Parameters
+    ----------
+    mass_list : TYPE
+        lLst.
+    zcg_list :     
+        List.
+
+    Returns
+    -------
+    ZCG : TYPE
+        List.
+
+    """
     M = sum(mass_list*zcg_list)
     F = sum(mass_list)
     ZCG = M/F

@@ -48,14 +48,17 @@ class Ship:
         self.buoyant_volume = self.values['buoyant_volume']
         self.I = self.values['I_wp']
         
-        self.tank1 = Tank(f'data/Tank1_Diagram_Volume_Gr{self.file[0]}_V{self.file[1]}.{self.file[2]}.csv', f'data/Tank1_Diagram_Waterplane_Gr{self.file[0]}_V{self.file[1]}.{self.file[2]}.csv',self.water_density,self.buoyant_volume,self.COV)
-        self.tank2 = Tank(f'data/Tank2_Diagram_Volume_Gr{self.file[0]}_V{self.file[1]}.{self.file[2]}.csv', f'data/Tank2_Diagram_Waterplane_Gr{self.file[0]}_V{self.file[1]}.{self.file[2]}.csv',self.water_density,self.buoyant_volume,self.COV)
-        self.tank3 = Tank(f'data/Tank3_Diagram_Volume_Gr{self.file[0]}_V{self.file[1]}.{self.file[2]}.csv', f'data/Tank3_Diagram_Waterplane_Gr{self.file[0]}_V{self.file[1]}.{self.file[2]}.csv',self.water_density,self.buoyant_volume,self.COV)
+        self.tank_data = self.loader.read_all_tanks()
+        self.tank1 = Tank(self.tank_data["tank1"]["volume"], self.tank_data["tank1"]["wp"], self.water_density, self.buoyant_volume, self.COV)
+        self.tank2 = Tank(self.tank_data["tank2"]["volume"], self.tank_data["tank2"]["wp"], self.water_density, self.buoyant_volume, self.COV)
+        self.tank3 = Tank(self.tank_data["tank3"]["volume"], self.tank_data["tank3"]["wp"], self.water_density, self.buoyant_volume, self.COV)
         self.tank3.percentage_filled(tank3_initial)
         
         #mass and COV calculations
+        self.df_hull = self.loader.read_csv("HullAreaData", skiprows=1)
+        self.df_BHD  = self.loader.read_csv("TankBHD_Data", skiprows=1)
         self.deck_data = deck(self.crane_position,self.TP_position,self.TP_mass,self.TP_amount,self.jib_length,self.jib_angle,self.slewing_angle)
-        self.plates_data = plates(self.file,self.hull_thickness,self.BHD_thickness,self.material_density,self.mass_factor)
+        self.plates_data = plates(self.file, self.df_hull, self.df_BHD, self.hull_thickness,self.BHD_thickness,self.material_density,self.mass_factor)
         self.dry_data = matrix_add(self.deck_data,self.plates_data)
         
         self.lM_dry = self.dry_data[0]*(self.dry_data[1]-self.COV[0])
