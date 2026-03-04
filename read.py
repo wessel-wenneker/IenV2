@@ -28,6 +28,7 @@ class ShipInputs:
     df_tank2_wp: pd.DataFrame
     df_tank3: pd.DataFrame
     df_tank3_wp: pd.DataFrame
+    df_resistance: pd.DataFrame
 
     # handige “ready-to-use” velden:
     buoyant_volume_m3: float
@@ -104,6 +105,7 @@ class DataLoader:
         df_tank2_wp = self.read_csv("Tank2_Diagram_Waterplane", skiprows=1)
         df_tank3 = self.read_csv("Tank3_Diagram_Volume", skiprows=1)
         df_tank3_wp = self.read_csv("Tank3_Diagram_Waterplane", skiprows=1)
+        df_resistance = self.read_csv("ResistanceData", skiprows=5)
         
         buoyant_volume = float(json_main["VOLUME RELATED DATA (MOULDED)"]["Buoyant_Volume_m3"])
         COB = json_main["VOLUME RELATED DATA (MOULDED)"]["COB_m"]
@@ -125,7 +127,8 @@ class DataLoader:
             df_tank2=df_tank2,
             df_tank2_wp=df_tank2_wp,
             df_tank3=df_tank3,
-            df_tank3_wp=df_tank3_wp
+            df_tank3_wp=df_tank3_wp,
+            df_resistance=df_resistance
         )
     
     def read_main_values(self):
@@ -164,5 +167,6 @@ class DataLoader:
                 "volume": df_vol,
                 "wp": df_wp
             }
+
 
         return tanks
