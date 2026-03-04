@@ -223,7 +223,7 @@ def plates(file, df_hull, df_BHD, hull_thickness, BHD_thickness, material_densit
     
     return np.array([mass_plates, lcg_plates, tcg_plates, vcg_plates])
 
-def resistance(file, design_speed): #speed in knots
+def resistance(file, df_resistance, design_speed): #speed in knots
     """
     Leest en berekent data van de weerstand en plot op aanvraag een grafiek
 
@@ -240,9 +240,8 @@ def resistance(file, design_speed): #speed in knots
         float.
 
     """
-    resistance_data = pd.read_csv(f'data/ResistanceData_Gr{file[0]}_V{file[1]}.{file[2]}.csv', delimiter=',', skiprows=5)
-    speed = resistance_data['V [kn]'].to_numpy()[:11]
-    resistance = resistance_data['  Rtot [N]'].to_numpy()[:11]/1000
+    speed = df_resistance['V [kn]'].to_numpy()[:11]
+    resistance = df_resistance['Rtot [N]'].to_numpy()[:11]/1000
     design_resistance = CubicSpline(speed,resistance)(design_speed)
     plt.plot(speed,resistance,'b')
     plt.title('resistance')
@@ -281,4 +280,5 @@ def matrix_add(matrix1, matrix2):
     for i in range(0,len(matrix1)):
         matrix3 = np.vstack([matrix3,np.append(matrix1[i],matrix2[i])])
     matrix3 = np.delete(matrix3,0,axis=0)
+
     return matrix3
