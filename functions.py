@@ -282,3 +282,8 @@ def matrix_add(matrix1, matrix2):
     matrix3 = np.delete(matrix3,0,axis=0)
 
     return matrix3
+
+
+
+
+#test
