@@ -43,4 +43,4 @@ transportschip2 = TransportSchip(file=file,
     material_density=material_density,
     mass_factor=mass_factor)
 
-print()
+print(hoi)
