@@ -126,4 +126,14 @@ class KraanSchip(Ship):
         def __init__(self, file, crane_position, jib_length, slewing_angle, jib_angle, **kwargs):
             super().__init__(file=file, TP_position=None, TP_mass=0, 
                              TP_amount=0, crane_position=crane_position, 
+
                              jib_length=jib_length, **kwargs)
+
+
+
+
+#test
+
+
+
+
