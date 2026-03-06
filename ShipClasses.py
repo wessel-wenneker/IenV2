@@ -132,7 +132,6 @@ class KraanSchip(Ship):
 
 
 
-#test
 
 
 
