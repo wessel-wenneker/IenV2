@@ -91,6 +91,15 @@ class DataLoader:
         df.columns = df.columns.str.strip()     #spaties kolomnamen verwijderen
         return df
 
+    def read_custom(self, stem: str, skiprows: int = 1):
+        """
+        Algemene CSV-loader voor extra bestanden zoals Buoyant_CSA.
+        
+            df = loader.read_custom("Buoyant_CSA")
+        """
+        return self.read_csv(stem, skiprows=skiprows)
+
+
     def load_inputs(self) -> ShipInputs:
         """
         Laadt alle benodigde bestanden in en bundelt deze in één ShipInputs-object.

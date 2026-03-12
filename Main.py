@@ -30,7 +30,7 @@ slewing_angle = 180
                 # jib_angle, TP_mass, water_density, material_density, 
                 # mass_factor)
 
-transportschip2 = TransportSchip(file=file,
+Ship = TransportSchip(file=file,
     TP_position=TP_position,
     TP_mass=TP_mass,
     TP_amount=TP_amount,
