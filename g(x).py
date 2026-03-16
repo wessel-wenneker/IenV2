@@ -114,8 +114,9 @@ xmaxBHD = BHD[' x_max [m]'].to_numpy()
 NBHD = BHD['BHD Area [m2]'].to_numpy()*metal_density*mass_factor*g
 
 deck = json.load(open('data/Antwoordenblad_Gr98V3.0.json'))
+SWLcrane = deck['Kraan_beladingsconditie']['SWLmax_kraan #[N]']
 xcrane = deck['Zwaartepunten_kraanlast']['LCG_kraanhuis #[m]']
-TP_amount = deck['Deklast_transition_pieces']['Aantal_transition_pieces #[-]']
+TPamount = deck['Deklast_transition_pieces']['Aantal_transition_pieces #[-]']
 keylist = list(deck['Lading_locaties'].keys())
 
 nx = np.linspace(s_x[0],s_x[-1],10000)
@@ -136,23 +137,23 @@ for i in range(0,len(NBHD)):
     else:
         Ntot[min_index:max_index] += NBHD[i]/(xmaxBHD[i] - xminBHD[i])*0.01
 
-weight = 230000*9.81
+weight_TP = 230000*9.81
 r1 = 4
-r2 = weight/r1/np.pi*2
+r2 = weight_TP/r1/np.pi*2
 
-for i in range(0,TP_amount):
+for i in range(0,TPamount):
     xTP = deck['Lading_locaties'][keylist[i]]['LCG #[m]']
     xminTP = np.searchsorted(nx,xTP-r1)
     xmaxTP = np.searchsorted(nx,xTP+r1)
     Ntot[xminTP:xmaxTP] +=  r2*np.sin(np.arccos(np.linspace(-1,1,len(Ntot[xminTP:xmaxTP]))))
 
-weight = 230000*9.81
+weight_crane = SWLcrane*1.51*9.81
 r1 = 1
-r2 = weight/r1/np.pi*2
-
+r2 = weight_crane/r1/np.pi*2
+    
 xmincrane = np.searchsorted(nx,xcrane-r1)
 xmaxcrane = np.searchsorted(nx,xcrane+r1)
-
+    
 Ntot[xmincrane:xmaxcrane] +=  r2*np.sin(np.arccos(np.linspace(-1,1,len(Ntot[xmincrane:xmaxcrane]))))
 
 #Ntot[0] = 0
@@ -214,18 +215,16 @@ for i in range(0, len(NBHD)):
 #Voeg de NIEUWE ballast toe (zorgt voor verticaal evenwicht)
 Ntot_new += (Nt1_new + Nt2_new + Nt3_new)
 
-weight_tp = 230000 * 9.81
 r1_tp = 4
-r2_tp = weight_tp / r1_tp / np.pi * 2
+r2_tp = weight_TP / r1_tp / np.pi * 2
 
-for i in range(0, TP_amount):
+for i in range(0, TPamount):
     xTP = deck['Lading_locaties'][keylist[i]]['LCG #[m]']
     xminTP = np.searchsorted(nx, xTP - r1_tp)
     xmaxTP = np.searchsorted(nx, xTP + r1_tp)
 
     Ntot_new[xminTP:xmaxTP] += r2_tp * np.sin(np.arccos(np.linspace(-1, 1, len(Ntot_new[xminTP:xmaxTP]))))
 
-weight_crane = 230000 * 9.81 
 r1_c = 1
 r2_c = weight_crane / r1_c / np.pi * 2
 
