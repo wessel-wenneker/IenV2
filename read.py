@@ -143,6 +143,9 @@ class DataLoader:
             df_tank3=df_tank3,
             df_tank3_wp=df_tank3_wp,
             df_resistance=df_resistance
+            kraanboom_lengte
+            zwenkhoek
+            giekhoek
         )
     
     def read_main_values(self):
