@@ -20,6 +20,7 @@ class ShipInputs:
     file: list[int]
     json_main: dict
     json_tank: dict
+    antwoordenblad: dict
     df_hull: pd.DataFrame
     df_BHD: pd.DataFrame
     df_tank1: pd.DataFrame
@@ -106,7 +107,7 @@ class DataLoader:
         """
         json_main = self.read_json("MainShipParticulars")
         json_tank = self.read_json("TankData")
-        antwoordenblad = self.read_json("Antwoordenblad_Gr98V3.json")
+        antwoordenblad = self.read_json("Antwoordenblad")
         df_hull = self.read_csv("HullAreaData", skiprows=1)
         df_BHD  = self.read_csv("TankBHD_Data", skiprows=1)
         df_tank1 = self.read_csv("Tank1_Diagram_Volume", skiprows=1)

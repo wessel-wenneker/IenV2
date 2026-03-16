@@ -246,6 +246,7 @@ Ms_balanced_arr = cumulative_trapezoid(Fs_balanced_arr, nx, initial=0)
 #print(trapezoid(q_balanced_arr,nx))
 
 #Plots
+print(giekhoek)
 plot(x_spant_arr, buoyancy_arr,"Length [m]" , "Buoyancy [N/m]", "Buoyancy along ship length")
 plot(nx,q_arr,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte")
 plot(nx, Fs_initial, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte zonder tank aanpassingen")
