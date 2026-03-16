@@ -142,10 +142,10 @@ class DataLoader:
             df_tank2_wp=df_tank2_wp,
             df_tank3=df_tank3,
             df_tank3_wp=df_tank3_wp,
-            df_resistance=df_resistance
-            kraanboom_lengte
-            zwenkhoek
-            giekhoek
+            df_resistance=df_resistance,
+            Kraanboom_lengte=kraanboom_lengte,
+            Zwenkhoek=zwenkhoek,
+            Giekhoek=giekhoek
         )
     
     def read_main_values(self):
