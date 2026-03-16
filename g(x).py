@@ -236,6 +236,7 @@ Ntot_new[xmincrane:xmaxcrane] += r2_c * np.sin(np.arccos(np.linspace(-1, 1, len(
 q_balanced_arr = Ntot_new + buoyancy_arr_fine
 
 Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
+Ms_balanced_arr = cumulative_trapezoid(Fs_balanced_arr, nx, initial=0)
 
 #check
 #trapezoid(Nt1/(g*water_density),nx)
@@ -253,4 +254,5 @@ plot(nx, Fs_initial, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs schee
 plot(nx, Ntot_new, "Lengte [m]", "Lading [N/m]", "Belading met tanks in evenwicht")
 plot(nx,q_balanced_arr ,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte met tanks in evenwicht")
 plot(nx, Fs_balanced_arr, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte met de tanks in evenwicht")
+plot(nx, Ms_balanced_arr, "Lengte [m]", "Moment [Nm]", "Moment langs scheepslengte met de tanks in evenwicht")
 
