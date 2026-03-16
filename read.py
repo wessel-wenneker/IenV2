@@ -106,6 +106,7 @@ class DataLoader:
         """
         json_main = self.read_json("MainShipParticulars")
         json_tank = self.read_json("TankData")
+        antwoordenblad = self.read_json("Antwoordenblad_Gr98V3.json")
         df_hull = self.read_csv("HullAreaData", skiprows=1)
         df_BHD  = self.read_csv("TankBHD_Data", skiprows=1)
         df_tank1 = self.read_csv("Tank1_Diagram_Volume", skiprows=1)
@@ -115,7 +116,11 @@ class DataLoader:
         df_tank3 = self.read_csv("Tank3_Diagram_Volume", skiprows=1)
         df_tank3_wp = self.read_csv("Tank3_Diagram_Waterplane", skiprows=1)
         df_resistance = self.read_csv("ResistanceData", skiprows=5)
-        
+
+    
+        kraanboom_lengte = float(antwoordenblad["Kraan_beladingsconditie"]["Kraanboom_lengte #[m]"])
+        zwenkhoek = float(antwoordenblad["Kraan_beladingsconditie"]["Zwenkhoek #[graden]"])
+        giekhoek = float(antwoordenblad["Kraan_beladingsconditie"]["Giekhoek #[graden]"])
         buoyant_volume = float(json_main["VOLUME RELATED DATA (MOULDED)"]["Buoyant_Volume_m3"])
         COB = json_main["VOLUME RELATED DATA (MOULDED)"]["COB_m"]
         H_m = float(json_main["MAIN DIMENSIONS"]["H_m"])
