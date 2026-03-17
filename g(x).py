@@ -10,6 +10,27 @@ import os
 from read import DataLoader
 from Main import file, Ship #schip is berekende boot
 
+def computeQFsMbArrays(buoyancy_arr, g_arr):
+    q = g_arr + buoyancy_arr
+    Fs = cumulative_trapezoid(q_arr, nx, initial=0)
+    Mb = cumulative_trapezoid(Fs, nx, initial=0)
+    return q, Fs, Mb
+
+def integrateTankCrossections():
+    """"""
+    inputs = loader.load_inputs()
+    
+    t1CSA = inputs.df_tank1["crossarea_in_m2"].to_numpy()
+    t1x =   inputs.df_tank1["x_in_m"].to_numpy()
+    t2CSA = inputs.df_tank2["crossarea_in_m2"].to_numpy()
+    t2x =   inputs.df_tank2["x_in_m"].to_numpy()
+    t3CSA = inputs.df_tank3["crossarea_in_m2"].to_numpy()
+    t3x =   inputs.df_tank3["x_in_m"].to_numpy()
+    
+    initial_v_tank1 = trapezoid(t1CSA,t1x)
+    initial_v_tank2 = trapezoid(t2CSA,t2x)
+    initial_v_tank3 = trapezoid(t3CSA,t3x)
+    return np.array([initial_v_tank1],[initial_v_tank2],[initial_v_tank3])
 
 def plot(x, y, x_label='x', y_label='y', title='', grid=False):
     plt.figure()
@@ -31,7 +52,7 @@ def interpolate(x,y,nx):
             ny = np.append(ny,0)
     return ny
 
-def findPercentagesequilibrium():
+def findPercentagesequilibrium(Q_evenwicht,initial_v_tanks):
     
     w_change_tanks = -Q_evenwicht
     v_change_tanks = w_change_tanks /(g * water_density)
@@ -44,26 +65,79 @@ def findPercentagesequilibrium():
     min_v_t2 = CubicSpline(tank2_filling_percentages, tank2_volumes)(20)
     
    #tank 2 begrensd door max en minimum 20%
-    v_change_t2 = np.clip(v_change_tanks, min_v_t2 - initial_v_tank2, max_v_t2 - initial_v_tank2)
+    v_change_t2 = np.clip(v_change_tanks, min_v_t2 - initial_v_tanks[1], max_v_t2 - initial_v_tanks[1])
     v_change_rest = v_change_tanks - v_change_t2
     
     #tank 1&3 begrensd door max én minimum 0%
-    max_change_t1_t3 = min(max_v_t1 - initial_v_tank1, max_v_t3 - initial_v_tank3)
-    min_change_t1_t3 = max(min_v_t1 - initial_v_tank1, min_v_t3 - initial_v_tank3)  # meest beperkende kant
+    max_change_t1_t3 = min(max_v_t1 - initial_v_tanks[0], max_v_t3 - initial_v_tanks[2])
+    min_change_t1_t3 = max(min_v_t1 - initial_v_tanks[0], min_v_t3 - initial_v_tanks[2])  # meest beperkende kant
     v_change_t1_t3 = np.clip(v_change_rest / 2, min_change_t1_t3, max_change_t1_t3)
+    v_change_arr = np.array([v_change_t1_t3],[v_change_t2],[v_change_t1_t3])
     
-    needed_v_t1 = initial_v_tank1 + v_change_t1_t3
-    needed_v_t2 = initial_v_tank2 + v_change_t2
-    needed_v_t3 = initial_v_tank3 + v_change_t1_t3
+    needed_v_tanks = initial_v_tanks + v_change_arr
     
     restant_v  = v_change_rest - 2*v_change_t1_t3
-    
-    needed_percentage_t1 = CubicSpline(tank1_volumes , tank1_filling_percentages)(needed_v_t1)
-    needed_percentage_t2 = CubicSpline(tank2_volumes , tank2_filling_percentages)(needed_v_t2)
-    needed_percentage_t3 = CubicSpline(tank3_volumes , tank3_filling_percentages)(needed_v_t3)
+    print(f"Er is {restant_v} volume te weinig voor evenwicht")
+    needed_percentage_t1 = CubicSpline(tank1_volumes , tank1_filling_percentages)(needed_v_tanks[0])
+    needed_percentage_t2 = CubicSpline(tank2_volumes , tank2_filling_percentages)(needed_v_tanks[1])
+    needed_percentage_t3 = CubicSpline(tank3_volumes , tank3_filling_percentages)(needed_v_tanks[2])
         
-    return needed_v_t1, needed_v_t2, needed_v_t3, needed_percentage_t1, needed_percentage_t2, needed_percentage_t3, restant_v
+    return needed_v_tanks, needed_percentage_t1, needed_percentage_t2, needed_percentage_t3, restant_v
     
+def checkTankvullingConsistency():
+    #evenwicht check
+    Q_evenwicht = trapezoid(Ntot,nx) + trapezoid(buoyancy_arr, x_spant_arr)
+    #huidig volume in de tank
+    initial_v_tanks = integrateTankCrossections()
+    
+    #functie de evenwicht zoekt met tanks 
+    needed_v_tanks, needed_perc_t1, needed_perc_t2, needed_perc_t3, restant = findPercentagesequilibrium(Q_evenwicht)
+    
+    fchange_v_tanks = needed_v_tanks/initial_v_tanks #verschil factor volume
+    #nieuwe belasting
+    Nt1_new = Nt1 * fchange_v_tanks[0]
+    Nt2_new = Nt2 * fchange_v_tanks[1]
+    Nt3_new = Nt3 * fchange_v_tanks[2]
+
+    #copy van eerder deel
+    Ntot_new = Nshell.copy()
+
+    transom_index = np.searchsorted(nx, xtransom + 0.5)
+    Ntot_new[1:transom_index] += Ntransom
+
+    for i in range(0, len(NBHD)):
+        min_index = np.searchsorted(nx, xminBHD[i])
+        max_index = np.searchsorted(nx, xmaxBHD[i])
+        if xmaxBHD[i] - xminBHD[i] <= 1:
+            Ntot_new[min_index:max_index] += NBHD[i]
+        else:
+            Ntot_new[min_index:max_index] += NBHD[i] / (xmaxBHD[i] - xminBHD[i]) * 0.01
+
+    #Voeg de NIEUWE ballast toe (zorgt voor verticaal evenwicht)
+    Ntot_new += (Nt1_new + Nt2_new + Nt3_new)
+
+    r1_tp = 4
+    r2_tp = weight_TP / r1_tp / np.pi * 2
+
+    for i in range(0, TPamount):
+        xTP = deck['Lading_locaties'][keylist[i]]['LCG #[m]']
+        xminTP = np.searchsorted(nx, xTP - r1_tp)
+        xmaxTP = np.searchsorted(nx, xTP + r1_tp)
+
+        Ntot_new[xminTP:xmaxTP] += r2_tp * np.sin(np.arccos(np.linspace(-1, 1, len(Ntot_new[xminTP:xmaxTP]))))
+
+    r1_c = 1
+    r2_c = weight_crane / r1_c / np.pi * 2
+
+    xmincrane = np.searchsorted(nx, xcrane - r1_c)
+    xmaxcrane = np.searchsorted(nx, xcrane + r1_c)
+    Ntot_new[xmincrane:xmaxcrane] += r2_c * np.sin(np.arccos(np.linspace(-1, 1, len(Ntot_new[xmincrane:xmaxcrane]))))
+
+    q_check, Fs_check, Mb_check = computeQFsMbArrays(buoyancy_arr_fine, Ntot_new)
+    
+    return Ntot_new, q_check, Fs_check, Mb_check
+
+
 water_density = 1025
 metal_density = 7850
 mass_factor = 2.1
@@ -71,6 +145,8 @@ shell_thickness = 8 #[mm]
 g = 9.81
 
 loader = DataLoader(file=file) #dataloader defineren voor goede file
+
+
 df_bouyant_CSA = loader.read_custom("Buoyant_CSA")
 df_watervolume_tank1 = loader.load_inputs().df_tank1
 df_watervolume_tank2 = loader.load_inputs().df_tank2
@@ -158,101 +234,23 @@ Ntot[xmincrane:xmaxcrane] +=  r2*np.sin(np.arccos(np.linspace(-1,1,len(Ntot[xmin
 
 #Ntot[0] = 0
 
-plot(nx,Ntot,'length [m]','load [kN/m]','load over length')
-
-#------------------------------------------------------------------------------
-# Direct uit CSV via read.dataloader (x en area van spanten) 
-x_spant_arr = df_bouyant_CSA["x_in_m"] #arr = array
-A_spant_arr = df_bouyant_CSA["crossarea_in_m2"]
-
 #drijfkracht in N/m lengte schip (negatief) en "fijnere" array voor Q
 buoyancy_arr = water_density * g * -A_spant_arr  
 buoyancy_arr_fine = np.interp(nx, x_spant_arr, buoyancy_arr) 
 
-q_arr = Ntot + buoyancy_arr_fine #totale verdeelde belasting
+q_arr, Fs, Mb = computeQFsMbArrays(buoyancy_arr_fine, Ntot)
 
-#evenwicht check
-W = trapezoid(Ntot,nx)
-B = trapezoid(buoyancy_arr, x_spant_arr)
-Q_evenwicht = W + B
-print(Q_evenwicht)
-
-#initial = rechtstreeks uit grasshopper
-Fs_initial = cumulative_trapezoid(q_arr, nx, initial = 0) 
-
-#benodigd volume berekenen
-initial_v_tank1 = trapezoid(t1CSA,t1x)
-initial_v_tank2 = trapezoid(t2CSA,t2x)
-initial_v_tank3 = trapezoid(t3CSA,t3x)
-
-#benodigde percentages vert. evenwicht (+volume dat niet past)
-needed_v_t1, needed_v_t2, needed_v_t3, needed_perc_t1, needed_perc_t2, needed_perc_t3, restant = findPercentagesequilibrium()
-print(f"Er is {restant} volume tekort voor evenwicht")
-#verschil factor volume
-fchange_v_t1 = needed_v_t1/initial_v_tank1
-fchange_v_t2 = needed_v_t2/initial_v_tank2
-fchange_v_t3 = needed_v_t3/initial_v_tank3
-
-#nieuwe belasting
-Nt1_new = Nt1 * fchange_v_t1
-Nt2_new = Nt2 * fchange_v_t2
-Nt3_new = Nt3 * fchange_v_t3
-
-#copy van eerder deel----------------------------------------------------------
-Ntot_new = Nshell.copy()
-
-transom_index = np.searchsorted(nx, xtransom + 0.5)
-Ntot_new[1:transom_index] += Ntransom
-
-for i in range(0, len(NBHD)):
-    min_index = np.searchsorted(nx, xminBHD[i])
-    max_index = np.searchsorted(nx, xmaxBHD[i])
-    if xmaxBHD[i] - xminBHD[i] <= 1:
-        Ntot_new[min_index:max_index] += NBHD[i]
-    else:
-        Ntot_new[min_index:max_index] += NBHD[i] / (xmaxBHD[i] - xminBHD[i]) * 0.01
-
-#Voeg de NIEUWE ballast toe (zorgt voor verticaal evenwicht)
-Ntot_new += (Nt1_new + Nt2_new + Nt3_new)
-
-r1_tp = 4
-r2_tp = weight_TP / r1_tp / np.pi * 2
-
-for i in range(0, TPamount):
-    xTP = deck['Lading_locaties'][keylist[i]]['LCG #[m]']
-    xminTP = np.searchsorted(nx, xTP - r1_tp)
-    xmaxTP = np.searchsorted(nx, xTP + r1_tp)
-
-    Ntot_new[xminTP:xmaxTP] += r2_tp * np.sin(np.arccos(np.linspace(-1, 1, len(Ntot_new[xminTP:xmaxTP]))))
-
-r1_c = 1
-r2_c = weight_crane / r1_c / np.pi * 2
-
-xmincrane = np.searchsorted(nx, xcrane - r1_c)
-xmaxcrane = np.searchsorted(nx, xcrane + r1_c)
-Ntot_new[xmincrane:xmaxcrane] += r2_c * np.sin(np.arccos(np.linspace(-1, 1, len(Ntot_new[xmincrane:xmaxcrane]))))
 #------------------------------------------------------------------------------
-q_balanced_arr = Ntot_new + buoyancy_arr_fine
-
-Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
-Ms_balanced_arr = cumulative_trapezoid(Fs_balanced_arr, nx, initial=0)
-
-#check
-#trapezoid(Nt1/(g*water_density),nx)
-#trapezoid(Nt2/(g*water_density),nx)
-#trapezoid(Nt3/(g*water_density),nx)
-#print(trapezoid(Ntot,nx))
-#print(trapezoid(Ntot_new,nx))
-#print(trapezoid(q_balanced_arr,nx))
-
 #Plots
 print(giekhoek)
+plot(nx,Ntot,'length [m]','load [kN/m]','load over length')
 plot(x_spant_arr, buoyancy_arr,"Length [m]" , "Buoyancy [N/m]", "Buoyancy along ship length")
 plot(nx,q_arr,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte")
-plot(nx, Fs_initial, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte zonder tank aanpassingen")
+plot(nx, Fs, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte")
+plot(nx,Mb,"Lengte [m]", "Moment [Nm]", "Moment langs scheepslengte")
 #Met tanks in balans
-plot(nx, Ntot_new, "Lengte [m]", "Lading [N/m]", "Belading met tanks in evenwicht")
-plot(nx,q_balanced_arr ,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte met tanks in evenwicht")
-plot(nx, Fs_balanced_arr, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte met de tanks in evenwicht")
-plot(nx, Ms_balanced_arr, "Lengte [m]", "Moment [Nm]", "Moment langs scheepslengte met de tanks in evenwicht")
-
+Ntot_check, q_check, Fs_check, Mb_check = checkTankvullingConsistency()
+plot(nx, Ntot_check, "Lengte [m]", "Lading [N/m]", "Belading met verdeelde belasting evenwicht")
+plot(nx,q_check ,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte met verdeelde belasting evenwicht")
+plot(nx, Fs_check, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte met de verdeelde belasting evenwicht")
+plot(nx, Mb_check, "Lengte [m]", "Moment [Nm]", "Moment langs scheepslengte met de verdeelde belasting evenwicht")
