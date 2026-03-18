@@ -236,7 +236,6 @@ Ntot_new[xmincrane:xmaxcrane] += r2_c * np.sin(np.arccos(np.linspace(-1, 1, len(
 q_balanced_arr = Ntot_new + buoyancy_arr_fine
 
 Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
-
 #check
 #trapezoid(Nt1/(g*water_density),nx)
 #trapezoid(Nt2/(g*water_density),nx)

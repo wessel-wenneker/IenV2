@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import pandas as pd
 import json
+import numpy as np
 
 @dataclass
 class ShipInputs:
@@ -91,15 +92,6 @@ class DataLoader:
         df.columns = df.columns.str.strip()     #spaties kolomnamen verwijderen
         return df
 
-    def read_custom(self, stem: str, skiprows: int = 1):
-        """
-        Algemene CSV-loader voor extra bestanden zoals Buoyant_CSA.
-        
-            df = loader.read_custom("Buoyant_CSA")
-        """
-        return self.read_csv(stem, skiprows=skiprows)
-
-
     def load_inputs(self) -> ShipInputs:
         """
         Laadt alle benodigde bestanden in en bundelt deze in één ShipInputs-object.
@@ -177,5 +169,33 @@ class DataLoader:
                 "wp": df_wp
             }
 
-
         return tanks
+
+def read_custom(self, stem: str, skiprows: int = 1):
+        """
+        Algemene CSV-loader voor extra bestanden zoals Buoyant_CSA.
+        
+            df = loader.read_custom("Buoyant_CSA")
+        """
+        return self.read_csv(stem, skiprows=skiprows)
+    
+    
+def readGegeven(file):
+    
+    data_antwoordenblad = json.load(open("data/Antwoordenblad_Gr98_V3.0.json"))
+    data_tanks = json.load(open("data/TankData_Gr98_V3.0.json"))
+    
+    tank3_initial = data_tanks["WB TANK 3"]["Height_of_WB_%_of_h_tank"]
+    hull_thickness =  np.array([0.010, data_antwoordenblad["Constructie"]["Huid_en_dek_dikte #[mm]"]/1000, data_antwoordenblad["Constructie"]["Huid_en_dek_dikte #[mm]"]/1000]) #[transom, shell, deck]
+    material_density = data_antwoordenblad["Materiaal"]["Soortelijk_gewicht_staal #[kg/m3]"]
+    water_density = data_antwoordenblad["Materiaal"]["Soortelijk_gewicht_zeewater #[kg/m3]"]
+    crane_position = [data_antwoordenblad["Zwaartepunten_kraanlast"]["LCG_kraanhuis #[m]"],data_antwoordenblad["Zwaartepunten_kraanlast"]["TCG_kraanhuis #[m]"],data_antwoordenblad["Zwaartepunten_kraanlast"]["VCG_kraanhuis #[m]"]]
+    TP_position = [data_antwoordenblad["Deklast_transition_pieces"]["LCG_transition_pieces #[m]"],data_antwoordenblad["Deklast_transition_pieces"]["TCG_transition_pieces #[m]"],data_antwoordenblad["Deklast_transition_pieces"]["VCG_transition_pieces #[m]"]]
+    TP_mass = data_antwoordenblad["Deklast_transition_pieces"]["Gewicht_per_transition_piece #[N]"]/9.81
+    TP_amount = data_antwoordenblad["Deklast_transition_pieces"]["Aantal_transition_pieces #[-]"]
+    jib_length = data_antwoordenblad["Kraan_beladingsconditie"]["Kraanboom_lengte #[m]"]
+    jib_angle = data_antwoordenblad["Kraan_beladingsconditie"]["Giekhoek #[graden]"]
+    slewing_angle = data_antwoordenblad["Kraan_beladingsconditie"]["Zwenkhoek #[graden]"]
+    crane_SWL = data_antwoordenblad["Kraan_beladingsconditie"]["SWLmax_kraan #[N]"]
+    
+    return tank3_initial, hull_thickness, material_density, water_density, crane_position, TP_position, TP_mass, TP_amount, jib_length, jib_angle, slewing_angle, crane_SWL
