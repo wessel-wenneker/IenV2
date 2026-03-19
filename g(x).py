@@ -159,7 +159,7 @@ Ntot[xmincrane:xmaxcrane] +=  r2*np.sin(np.arccos(np.linspace(-1,1,len(Ntot[xmin
 
 plot(nx,Ntot,'length [m]','load [kN/m]','load over length')
 
-#------------------------------------------------------------------------------
+#
 # Direct uit CSV via read.dataloader (x en area van spanten) 
 x_spant_arr = df_bouyant_CSA["x_in_m"] #arr = array
 A_spant_arr = df_bouyant_CSA["crossarea_in_m2"]
@@ -197,7 +197,7 @@ Nt1_new = Nt1 * fchange_v_t1
 Nt2_new = Nt2 * fchange_v_t2
 Nt3_new = Nt3 * fchange_v_t3
 
-#copy van eerder deel----------------------------------------------------------
+#copy van eerder deel-
 Ntot_new = Nshell.copy()
 
 transom_index = np.searchsorted(nx, xtransom + 0.5)
@@ -232,7 +232,7 @@ r2_c = weight_crane / r1_c / np.pi * 2
 xmincrane = np.searchsorted(nx, xcrane - r1_c)
 xmaxcrane = np.searchsorted(nx, xcrane + r1_c)
 Ntot_new[xmincrane:xmaxcrane] += r2_c * np.sin(np.arccos(np.linspace(-1, 1, len(Ntot_new[xmincrane:xmaxcrane]))))
-#------------------------------------------------------------------------------
+#
 q_balanced_arr = Ntot_new + buoyancy_arr_fine
 
 Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
@@ -244,12 +244,80 @@ Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
 #print(trapezoid(Ntot_new,nx))
 #print(trapezoid(q_balanced_arr,nx))
 
-#Plots
-plot(x_spant_arr, buoyancy_arr,"Length [m]" , "Buoyancy [N/m]", "Buoyancy along ship length")
-plot(nx,q_arr,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte")
-plot(nx, Fs_initial, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte zonder tank aanpassingen")
-#Met tanks in balans
-plot(nx, Ntot_new, "Lengte [m]", "Lading [N/m]", "Belading met tanks in evenwicht")
-plot(nx,q_balanced_arr ,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte met tanks in evenwicht")
-plot(nx, Fs_balanced_arr, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte met de tanks in evenwicht")
+# #Plots
+# plot(x_spant_arr, buoyancy_arr,"Length [m]" , "Buoyancy [N/m]", "Buoyancy along ship length")
+# plot(nx,q_arr,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte")
+# plot(nx, Fs_initial, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte zonder tank aanpassingen")
+# #Met tanks in balans
+# plot(nx, Ntot_new, "Lengte [m]", "Lading [N/m]", "Belading met tanks in evenwicht")
+# plot(nx,q_balanced_arr ,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte met tanks in evenwicht")
+# plot(nx, Fs_balanced_arr, "Lengte [m]", "Schuifkracht [N]", "Schuifkracht langs scheepslengte met de tanks in evenwicht")
 
+#  Stap 10: Momentenlijn
+Mx = cumulative_trapezoid(Fs_balanced_arr, nx, initial=0)
+
+# Stap 11: Traagheidsmoment I(x) 
+s_Ix_ref = shell['INERTIA_X[m4]'].to_numpy()   # bij 1 mm referentiedikte
+s_cz     = shell['CENTROID_Z[m]'].to_numpy()
+s_zk     = shell['Z_Keel[m]'].to_numpy()
+s_zd     = shell['Z_DECK[m]'].to_numpy()
+
+# Schalen: I schaalt lineair met t voor dunne schaal
+Ix = interpolate(s_x, s_Ix_ref * shell_thickness, nx)  # shell_thickness = 8
+
+# Stap 12: Buigstijfheid EI(x) 
+E = 205e9  # Pa
+EI = E * Ix
+
+# Stap 13: Gereduceerd moment κ(x) = M(x) / (E·I(x)) 
+kappa = np.where(Ix > 0, Mx / EI, 0)
+
+# Stap 14: Buigspanning dek en bodem 
+z_na   = interpolate(s_x, s_cz, nx)
+z_keel = interpolate(s_x, s_zk, nx)
+z_deck = interpolate(s_x, s_zd, nx)
+
+# sigma = M·z / I  (z vanaf NA, positief omhoog)
+sigma_bodem = np.where(Ix > 0, Mx * (z_keel - z_na) / Ix, 0)  # bodem onder NA → negatieve z
+sigma_dek   = np.where(Ix > 0, Mx * (z_deck - z_na) / Ix, 0)  # dek boven NA → positieve z
+
+# Omzetten naar MPa
+sigma_bodem_MPa = sigma_bodem / 1e6
+sigma_dek_MPa   = sigma_dek / 1e6
+
+# Plot
+sigma_y = 355  # MPa
+x_min= s_x[0]
+x_max= s_x[-2]
+mask = (nx>=x_min) & (nx<=x_max)  
+kappa[~mask] = 0
+sigma_bodem[~mask] = 0
+sigma_dek[~mask] = 0
+
+plt.figure()
+plt.plot(nx, Ix, 'k')
+plt.xlabel('Lengte [m]')
+plt.ylabel('Traagheidsmoment I [m^4]')
+
+plt.figure()
+plt.plot(nx, EI, 'k')
+plt.xlabel('Lengte [m]')
+plt.ylabel('Buigstijfheid EI [Nm^2]')
+
+plt.figure()
+plt.plot(nx, kappa, 'k')
+plt.xlabel('Lengte [m]')
+plt.ylabel('Gereduceerd moment κ [1/m]')
+
+plt.figure()
+plt.plot(nx, sigma_bodem_MPa, 'b', label='Bodem')
+plt.plot(nx, sigma_dek_MPa, 'r', label='Dek')
+plt.ylim(-800,500)
+plt.axhline(sigma_y, color='k', linestyle='--', label=f'σ_y = {sigma_y} MPa')
+plt.axhline(-sigma_y, color='k', linestyle='--')
+plt.xlabel('Lengte [m]')
+plt.ylabel('Buigspanning [MPa]')
+plt.title('Buigspanning dek en bodem over scheepslengte')
+plt.legend()
+plt.grid()
+plt.show()
