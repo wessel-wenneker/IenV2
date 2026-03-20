@@ -404,10 +404,22 @@ def toonSterkteGrafieken(resultaat: SterkteResultaat, save_map=None) -> None:
     """Toont of slaat alle grafieken op die bij de langsscheepse sterkte horen."""
     from pathlib import Path
 
-    def _save_pad(nummer: int):
+    BESTANDSNAMEN = [
+        "verdeelde_belasting",
+        "dwarskrachtenlijn",
+        "momentenlijn",
+        "traagheidsmoment",
+        "buigstijfheid",
+        "gereduceerd_moment",
+        "buigspanning",
+        "hoekverdraaiing",
+        "doorbuiging",
+    ]
+
+    def _save_pad(index: int):
         if save_map is None:
             return None
-        return Path(save_map) / f"figure_{nummer:02d}.png"
+        return Path(save_map) / f"{BESTANDSNAMEN[index]}.png"
 
     plotLijn(
         resultaat.x_fijn,
@@ -415,7 +427,7 @@ def toonSterkteGrafieken(resultaat: SterkteResultaat, save_map=None) -> None:
         "Lengte [m]",
         "Verdeelde belasting q(x) [kN/m]",
         "Verdeelde belasting q(x)",
-        save_pad=_save_pad(1),
+        save_pad=_save_pad(0),
     )
     plotLijn(
         resultaat.x_fijn,
@@ -424,7 +436,7 @@ def toonSterkteGrafieken(resultaat: SterkteResultaat, save_map=None) -> None:
         "Dwarskracht V(x) [MN]",
         "Dwarskrachtenlijn V(x)",
         raster=True,
-        save_pad=_save_pad(2),
+        save_pad=_save_pad(1),
     )
     plotLijn(
         resultaat.x_fijn,
@@ -433,11 +445,11 @@ def toonSterkteGrafieken(resultaat: SterkteResultaat, save_map=None) -> None:
         "Buigend moment M(x) [MNm]",
         "Momentenlijn M(x)",
         raster=True,
-        save_pad=_save_pad(3),
+        save_pad=_save_pad(2),
     )
-    plotLijn(resultaat.x_fijn, resultaat.traagheidsmoment_lijn, "Lengte [m]", "Traagheidsmoment I(x) [m^4]", "Traagheidsmoment I(x)", save_pad=_save_pad(4))
-    plotLijn(resultaat.x_fijn, resultaat.buigstijfheid_lijn, "Lengte [m]", "Buigstijfheid EI(x) [Nm^2]", "Buigstijfheid EI(x)", save_pad=_save_pad(5))
-    plotLijn(resultaat.x_fijn, resultaat.gereduceerd_moment_lijn, "Lengte [m]", "Gereduceerd moment kappa(x) [1/m]", "Gereduceerd moment kappa(x)", save_pad=_save_pad(6))
+    plotLijn(resultaat.x_fijn, resultaat.traagheidsmoment_lijn, "Lengte [m]", "Traagheidsmoment I(x) [m^4]", "Traagheidsmoment I(x)", save_pad=_save_pad(3))
+    plotLijn(resultaat.x_fijn, resultaat.buigstijfheid_lijn, "Lengte [m]", "Buigstijfheid EI(x) [Nm^2]", "Buigstijfheid EI(x)", save_pad=_save_pad(4))
+    plotLijn(resultaat.x_fijn, resultaat.gereduceerd_moment_lijn, "Lengte [m]", "Gereduceerd moment kappa(x) [1/m]", "Gereduceerd moment kappa(x)", save_pad=_save_pad(5))
 
     fig_sigma = plt.figure()
     plt.plot(resultaat.x_fijn, resultaat.sigma_bodem_mpa, "b", label="Bodem")
@@ -450,11 +462,11 @@ def toonSterkteGrafieken(resultaat: SterkteResultaat, save_map=None) -> None:
     plt.title("Buigspanning dek en bodem over scheepslengte")
     plt.legend()
     plt.grid()
-    if _save_pad(7) is not None:
-        plt.savefig(_save_pad(7), dpi=150, bbox_inches="tight")
+    if _save_pad(6) is not None:
+        plt.savefig(_save_pad(6), dpi=150, bbox_inches="tight")
         plt.close(fig_sigma)
     else:
         plt.show()
 
-    plotLijn(resultaat.x_fijn, resultaat.hoekverdraaiing_lijn, "Lengte [m]", "Hoekverdraaiing theta(x) [rad]", "Hoekverdraaiing over scheepslengte", raster=True, save_pad=_save_pad(8))
-    plotLijn(resultaat.x_fijn, resultaat.doorbuiging_lijn, "Lengte [m]", "Doorbuiging w(x) [m]", "Doorbuiging over scheepslengte", raster=True, save_pad=_save_pad(9))
+    plotLijn(resultaat.x_fijn, resultaat.hoekverdraaiing_lijn, "Lengte [m]", "Hoekverdraaiing theta(x) [rad]", "Hoekverdraaiing over scheepslengte", raster=True, save_pad=_save_pad(7))
+    plotLijn(resultaat.x_fijn, resultaat.doorbuiging_lijn, "Lengte [m]", "Doorbuiging w(x) [m]", "Doorbuiging over scheepslengte", raster=True, save_pad=_save_pad(8))
