@@ -76,8 +76,8 @@ df_watervolume_tank1 = loader.load_inputs().df_tank1
 df_watervolume_tank2 = loader.load_inputs().df_tank2
 df_watervolume_tank3 = loader.load_inputs().df_tank3
 
-x_spant_arr = df_bouyant_CSA["x_in_m"].to_numpy #arr = array
-A_spant_arr = df_bouyant_CSA["crossarea_in_m2"].to_numpy
+x_spant_arr = df_bouyant_CSA["x_in_m"].to_numpy() #arr = array
+A_spant_arr = df_bouyant_CSA["crossarea_in_m2"].to_numpy()
 
 tank1_volumes = df_watervolume_tank1["Tankvolume [m3]"].to_numpy()
 tank2_volumes = df_watervolume_tank2["Tankvolume [m3]"].to_numpy()
@@ -106,12 +106,12 @@ t3CSA = tank3[' crossarea_in_m2'].to_numpy()
 
 hull = pd.read_csv('data/HullAreaData_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 xtransom = hull[' lca [m]'][0]
-Ntransom = hull[' Area [m2]'][0]*metal_density*g
+Ntransom = hull[' Area [m2]'][0]*0.010*metal_density*mass_factor*g
 
 BHD = pd.read_csv('data/TankBHD_Data_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 xminBHD = BHD[' x_min [m]'].to_numpy()
 xmaxBHD = BHD[' x_max [m]'].to_numpy()
-NBHD = BHD['BHD Area [m2]'].to_numpy()*metal_density*mass_factor*g
+NBHD = BHD['BHD Area [m2]'].to_numpy()*0.010*metal_density*mass_factor*g
 
 deck = json.load(open('data/Antwoordenblad_Gr98V3.0.json'))
 xcrane = deck['Zwaartepunten_kraanlast']['LCG_kraanhuis #[m]']
@@ -126,15 +126,12 @@ Nt3 = interpolate(t3x,t3CSA,nx)*water_density*g
 Ntot = Nshell+Nt1+Nt2+Nt3
 
 transom_index = np.searchsorted(nx,xtransom+0.5)
-Ntot[1:transom_index] += Ntransom
+Ntot[1:transom_index] += Ntransom / (nx[transom_index - 1] - nx[1])
 
 for i in range(0,len(NBHD)):
     min_index = np.searchsorted(nx,xminBHD[i])
     max_index = np.searchsorted(nx,xmaxBHD[i])
-    if xmaxBHD[i] - xminBHD[i] <= 1:
-        Ntot[min_index:max_index] += NBHD[i]
-    else:
-        Ntot[min_index:max_index] += NBHD[i]/(xmaxBHD[i] - xminBHD[i])*0.01
+    Ntot[min_index:max_index] += NBHD[i] / (xmaxBHD[i] - xminBHD[i])
 
 weight = 230000*9.81
 r1 = 4
@@ -157,7 +154,7 @@ Ntot[xmincrane:xmaxcrane] +=  r2*np.sin(np.arccos(np.linspace(-1,1,len(Ntot[xmin
 
 #Ntot[0] = 0
 
-plot(nx,Ntot,'length [m]','load [kN/m]','load over length')
+plot(nx,Ntot/1000,'length [m]','load [kN/m]','load over length')
 
 #
 # Direct uit CSV via read.dataloader (x en area van spanten) 
@@ -201,15 +198,12 @@ Nt3_new = Nt3 * fchange_v_t3
 Ntot_new = Nshell.copy()
 
 transom_index = np.searchsorted(nx, xtransom + 0.5)
-Ntot_new[1:transom_index] += Ntransom
+Ntot_new[1:transom_index] += Ntransom / (nx[transom_index - 1] - nx[1])
 
 for i in range(0, len(NBHD)):
     min_index = np.searchsorted(nx, xminBHD[i])
     max_index = np.searchsorted(nx, xmaxBHD[i])
-    if xmaxBHD[i] - xminBHD[i] <= 1:
-        Ntot_new[min_index:max_index] += NBHD[i]
-    else:
-        Ntot_new[min_index:max_index] += NBHD[i] / (xmaxBHD[i] - xminBHD[i]) * 0.01
+    Ntot_new[min_index:max_index] += NBHD[i] / (xmaxBHD[i] - xminBHD[i])
 
 #Voeg de NIEUWE ballast toe (zorgt voor verticaal evenwicht)
 Ntot_new += (Nt1_new + Nt2_new + Nt3_new)
@@ -236,13 +230,12 @@ Ntot_new[xmincrane:xmaxcrane] += r2_c * np.sin(np.arccos(np.linspace(-1, 1, len(
 q_balanced_arr = Ntot_new + buoyancy_arr_fine
 
 Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
-#check
-#trapezoid(Nt1/(g*water_density),nx)
-#trapezoid(Nt2/(g*water_density),nx)
-#trapezoid(Nt3/(g*water_density),nx)
-#print(trapezoid(Ntot,nx))
-#print(trapezoid(Ntot_new,nx))
-#print(trapezoid(q_balanced_arr,nx))
+
+# Stap 8: Controleer evenwicht voor krachten en langsscheepse momenten
+force_residual = trapezoid(q_balanced_arr, nx)
+moment_residual = trapezoid(q_balanced_arr * nx, nx)
+print(f"Stap 8 - Krachtenevenwicht restant:   {force_residual/1e3:.2f} kN  (moet ≈ 0)")
+print(f"Stap 8 - Momentenevenwicht restant:   {moment_residual/1e6:.2f} MNm (moet ≈ 0)")
 
 # #Plots
 # plot(x_spant_arr, buoyancy_arr,"Length [m]" , "Buoyancy [N/m]", "Buoyancy along ship length")
@@ -256,7 +249,22 @@ Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
 #  Stap 10: Momentenlijn
 Mx = cumulative_trapezoid(Fs_balanced_arr, nx, initial=0)
 
-# Stap 11: Traagheidsmoment I(x) 
+# Stap 10: Voeg langsscheeps kraanmoment toe
+try:
+    jib_length_val = deck['Kraan_beladingsconditie']['Kraanboom_lengte #[m]']
+    jib_angle_val  = deck['Kraan_beladingsconditie']['Giekhoek #[graden]'] * math.pi / 180
+    slewing_val    = deck['Kraan_beladingsconditie']['Zwenkhoek #[graden]'] * math.pi / 180
+    if jib_length_val > 0 and xcrane > 0:
+        x_load_crane   = xcrane + jib_length_val * math.cos(jib_angle_val) * math.cos(slewing_val)
+        M_crane_long   = weight_crane * (x_load_crane - xcrane)
+        if abs(M_crane_long) > 1e3:
+            crane_idx = np.searchsorted(nx, xcrane)
+            Mx[crane_idx:] += M_crane_long
+            print(f"Stap 10 - Langsscheeps kraanmoment: {M_crane_long/1e6:.2f} MNm bij x={xcrane:.1f} m")
+except KeyError:
+    pass
+
+# Stap 11: Traagheidsmoment I(x)
 s_Ix_ref = shell['INERTIA_X[m4]'].to_numpy()   # bij 1 mm referentiedikte
 s_cz     = shell['CENTROID_Z[m]'].to_numpy()
 s_zk     = shell['Z_Keel[m]'].to_numpy()
@@ -264,6 +272,9 @@ s_zd     = shell['Z_DECK[m]'].to_numpy()
 
 # Schalen: I schaalt lineair met t voor dunne schaal
 Ix = interpolate(s_x, s_Ix_ref * shell_thickness, nx)  # shell_thickness = 8
+
+# Stap 15: Asymptoot preventie - clamp Ix op minimum 0.01 m^4
+Ix = np.maximum(Ix, 0.01)
 
 # Stap 12: Buigstijfheid EI(x) 
 E = 205e9  # Pa
@@ -289,10 +300,19 @@ sigma_dek_MPa   = sigma_dek / 1e6
 sigma_y = 355  # MPa
 x_min= s_x[0]
 x_max= s_x[-2]
-mask = (nx>=x_min) & (nx<=x_max)  
+mask = (nx>=x_min) & (nx<=x_max)
 kappa[~mask] = 0
 sigma_bodem[~mask] = 0
 sigma_dek[~mask] = 0
+
+# Stap 15: Zoekgebied 0.1L - 0.9L voor maximale buigspanning
+L_ship = s_x[-1] - s_x[0]
+mask_search = (nx >= s_x[0] + 0.1*L_ship) & (nx <= s_x[0] + 0.9*L_ship)
+max_sigma_bodem = np.max(np.abs(sigma_bodem_MPa[mask_search]))
+max_sigma_dek   = np.max(np.abs(sigma_dek_MPa[mask_search]))
+print(f"Stap 15 - Max buigspanning bodem (0.1L-0.9L): {max_sigma_bodem:.1f} MPa")
+print(f"Stap 15 - Max buigspanning dek   (0.1L-0.9L): {max_sigma_dek:.1f} MPa")
+print(f"Stap 15 - Toelaatbare spanning:               {sigma_y} MPa")
 
 plt.figure()
 plt.plot(nx, Ix, 'k')
@@ -321,3 +341,18 @@ plt.title('Buigspanning dek en bodem over scheepslengte')
 plt.legend()
 plt.grid()
 plt.show()
+
+# Deel 2 - Stap 1: Hoekverdraaiing θ(x) = ∫κ(x)dx
+# Integratiegrens C1 gekozen zodat w(0) = w(L) = 0 (beide uiteinden als referentie)
+theta_raw = cumulative_trapezoid(kappa, nx, initial=0)
+C1 = -trapezoid(theta_raw, nx) / (nx[-1] - nx[0])
+theta = theta_raw + C1
+
+# Deel 2 - Stap 2: Doorbuiging w(x) = ∫θ(x)dx
+w = cumulative_trapezoid(theta, nx, initial=0)
+
+plot(nx, theta, 'Lengte [m]', 'Hoekverdraaiing θ [rad]', 'Hoekverdraaiing over scheepslengte', grid=True)
+plot(nx, w, 'Lengte [m]', 'Doorbuiging w [m]', 'Doorbuiging over scheepslengte', grid=True)
+
+max_deflection = np.max(np.abs(w[mask_search]))
+print(f"Deel 2  - Max doorbuiging (0.1L-0.9L): {max_deflection*1000:.1f} mm")
