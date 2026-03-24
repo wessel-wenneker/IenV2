@@ -84,6 +84,14 @@ class DataLoader:
         with open(self.path(stem, "json"), "r", encoding="utf-8") as f:  #'r'--> read
             return json.load(f)
 
+    def read_custom(self, stem: str, skiprows: int = 1):
+            """
+            Algemene CSV-loader voor extra bestanden zoals Buoyant_CSA.
+            
+                df = loader.read_custom("Buoyant_CSA")
+            """
+            return self.read_csv(stem, skiprows=skiprows)
+        
     def read_csv(self, stem, skiprows=1):
         """
         Leest een csv-bestand in als pandas DataFrame.
