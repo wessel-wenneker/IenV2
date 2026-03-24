@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar  3 17:44:48 2026
+Created on Tue Mar 24 16:45:28 2026
 
 @author: ellin
 """
+
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -170,16 +171,6 @@ class DataLoader:
             }
 
         return tanks
-    
-
-    def read_custom(self, stem: str, skiprows: int = 1):
-            """
-            Algemene CSV-loader voor extra bestanden zoals Buoyant_CSA.
-            
-                df = loader.read_custom("Buoyant_CSA")
-            """
-            return self.read_csv(stem, skiprows=skiprows)
-    
     
 def readGegeven(file):
     
