@@ -242,7 +242,6 @@ q_arr, Fs, Mb = computeQFsMbArrays(buoyancy_arr_fine, Ntot)
 
 #------------------------------------------------------------------------------
 #Plots
-print(giekhoek)
 plot(nx,Ntot,'length [m]','load [kN/m]','load over length')
 plot(x_spant_arr, buoyancy_arr,"Length [m]" , "Buoyancy [N/m]", "Buoyancy along ship length")
 plot(nx,q_arr,"Lengte [m]", "Belasting [N/m]", "Belasting langs scheepslengte")
