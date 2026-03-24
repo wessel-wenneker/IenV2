@@ -1,0 +1,133 @@
+--------------------------
+Resultaten
+--------------------------
+3.01
+0.0
+
+0.0
+
+-0.0
+0.0
+
+162.14483562107844
+920.0
+
+0.0
+1583.93
+
+175.82
+
+0.0
+0.0
+
+0.0
+0.0
+
+50.0
+88.5744
+50.0
+0.5222
+
+
+
+
+--------------------------
+Controle stabiliteit
+--------------------------
+De actuele GM is 3.01
+De door het groepje berekende GM is 3.01
+Het procentuele verschil is 0.0 %
+
+
+--------------------------
+Controle evenwicht
+--------------------------
+De som van het krachtenevenwicht is -2.41 N
+Dit is 0.0 % van de opwaartse kracht
+
+De som van het longitudinale momentenevenwicht is -589.77 Nm
+Dit geeft een extra trimhoek van 0.0 graden
+
+De som van het transverse momentenevenwicht is 0.0 Nm
+Dit geeft een extra hellingshoek van -0.0 graden
+
+
+--------------------------
+Controle staal
+--------------------------
+De plaatdikte van huid en dek is 12 mm
+De plaatdikte van spiegel is 10.0 mm
+De plaatdikte van tankschotten is 10.0 mm
+De plaatdikte in de rompgenerator moet 1mm zijn en staat op 1.0 mm
+De maximale buigspanning is 175.82 MPa
+De maximaal toelaatbare spanning is 190.0 MPa
+
+Het maximale moment is 246838554.49 Nm
+Het door het groepje berekende moment is 246838554.49 Nm
+Het procentuele verschil is 0.0 %
+
+De locatie van het maximale moment is 72.65 m
+De door het groepje berekende locatie is 72.65 m
+Het procentuele verschil is 0.0 %
+
+De maximale doorbuiging is 313.21 mm
+De door het groepje berekende doorbuiging is 313.21 mm
+Het procentuele verschil is 0.0 %
+
+De locatie van de maximale doorbuiging is 72.21 m
+De door het groepje berekende locatie is 72.21 m
+Het procentuele verschil is 0.0 %
+
+De staaldichtheid van het groepje is 7850 kg/m^3
+
+--------------------------
+Ontwerpwedstrijd
+--------------------------
+De weerstand is 162.14483562107844 kN
+De weerstand per ladinggewicht is 0.17624 kN/ton
+
+Het aantal transition pieces is 4
+
+De kraanlast is 0.0 MN
+Het scheepsgewicht is is 1583.93 ton
+
+
+--------------------------
+Krachten
+--------------------------
+De kracht van de spiegel is 42430.07 N
+De kracht van de huid is 6852668.72 N
+De kracht van het dek 4286346.17 N
+De kracht van de buoyancy is -68055944.06 N
+
+De kracht van de tankwanden zijn 4356879.41 N
+De kracht van de tank1 is 12663217.84995 N
+De kracht van de tank2 is 18165981.56715 N
+De kracht van de tank3 is 12663217.84995 N
+
+De kracht van de last is 0.0 N
+De kracht van het kraanhuis is 0.0 N
+De kracht van de kraanboom is 0.0 N
+De kracht van de hijsgerei is 0.0 N
+De kracht van de kraan met last is 0.0 N
+
+De kracht van de lading is 9025200.0 N
+
+
+--------------------------
+Krachten volgens integratie
+--------------------------
+De kracht van de spiegel is 42408.86 N
+De kracht van de shell is 11113572.96 N
+De kracht van de buoyancy is -68097178.96 N
+
+De kracht van de tankwanden zijn 4356891.01 N
+De kracht van de tank1 is 12638459.368413882 N
+De kracht van de tank2 is 18165987.600304246 N
+De kracht van de tank3 is 12638459.368413882 N
+
+De kracht van de kraan met last is 0.0 N
+De kracht van de lading is 9025186.64590851 N
+
+De som van het krachtenevenwicht is -116213.15 N
+
