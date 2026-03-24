@@ -40,7 +40,6 @@ def plot(x, y, x_label='x', y_label='y', title='', grid=False):
     plt.title(title)
     if grid:
         plt.grid()
-    plt.show()
     return y
 
 def interpolate(x,y,nx):
