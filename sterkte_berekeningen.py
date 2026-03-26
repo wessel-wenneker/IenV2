@@ -6,6 +6,8 @@ Created on Tue Mar 24 16:00:50 2026
 """
 from scipy.integrate import trapezoid, cumulative_trapezoid, simpson
 from scipy.interpolate import interp1d, CubicSpline
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -174,33 +176,33 @@ tank1_filling_percentages = df_watervolume_tank1["Tankfilling [% of h_tank]"].to
 tank2_filling_percentages = df_watervolume_tank2["Tankfilling [% of h_tank]"].to_numpy()
 tank3_filling_percentages = df_watervolume_tank3["Tankfilling [% of h_tank]"].to_numpy()
 
-shell = pd.read_csv('data/Shell_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+shell = pd.read_csv('Data/Shell_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 s_x = shell['X [m]'].to_numpy()
 s_outline = shell['OUTLINE LENGTH [m]'].to_numpy()
 s_CSA = shell['CROSS SECTION AREA OF SHELL PLATING [m2]'].to_numpy()
 
-tank1 = pd.read_csv('data/Tank1_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+tank1 = pd.read_csv('Data/Tank1_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 t1x = tank1['x_in_m'].to_numpy()
 t1CSA = tank1[' crossarea_in_m2'].to_numpy()
 
-tank2 = pd.read_csv('data/Tank2_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+tank2 = pd.read_csv('Data/Tank2_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 t2x = tank2['x_in_m'].to_numpy()
 t2CSA = tank2[' crossarea_in_m2'].to_numpy()
 
-tank3 = pd.read_csv('data/Tank3_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+tank3 = pd.read_csv('Data/Tank3_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 t3x = tank3['x_in_m'].to_numpy()
 t3CSA = tank3[' crossarea_in_m2'].to_numpy()
 
-hull = pd.read_csv('data/HullAreaData_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+hull = pd.read_csv('Data/HullAreaData_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 xtransom = hull[' lca [m]'][0]
 Ntransom = hull[' Area [m2]'][0]*metal_density*g
 
-BHD = pd.read_csv('data/TankBHD_Data_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+BHD = pd.read_csv('Data/TankBHD_Data_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 xminBHD = BHD[' x_min [m]'].to_numpy()
 xmaxBHD = BHD[' x_max [m]'].to_numpy()
 NBHD = BHD['BHD Area [m2]'].to_numpy()*metal_density*mass_factor*g
 
-deck = json.load(open('data/Antwoordenblad_Gr98V3.0.json'))
+deck = json.load(open('Data/Antwoordenblad_Gr98V3.0.json'))
 SWLcrane = deck['Kraan_beladingsconditie']['SWLmax_kraan #[N]']
 xcrane = deck['Zwaartepunten_kraanlast']['LCG_kraanhuis #[m]']
 TPamount = deck['Deklast_transition_pieces']['Aantal_transition_pieces #[-]']
@@ -337,4 +339,47 @@ plt.ylabel('Buigspanning [MPa]')
 plt.title('Buigspanning dek en bodem over scheepslengte')
 plt.legend()
 plt.grid()
+
+# Deel 2: Doorbuiging bepalen
+# 1. Bepaal de verdeling van de hoekverdraaiing door het verdeelde gereduceerde moment te integreren.
+theta_prime_rad = cumulative_trapezoid(kappa, nx, initial=0)
+theta_prime_deg = np.degrees(theta_prime_rad)
+
+# 2. Bepaal de verdeling van de doorbuiging door de verdeelde hoekverdraaiing te integreren.
+w_prime = cumulative_trapezoid(theta_prime_rad, nx, initial=0)
+
+# Relatieve waarden berekenen (w(0) = 0 en w(L) = 0)
+delta_x = nx[-1] - nx[0]
+theta_corr_rad = (w_prime[-1] - w_prime[0]) / delta_x if delta_x != 0 else 0
+
+theta_rad = theta_prime_rad - theta_corr_rad
+theta_deg = np.degrees(theta_rad)
+
+w = w_prime - theta_corr_rad * (nx - nx[0]) - w_prime[0]
+
+# Extra plots voor doorbuiging
+plt.figure()
+plt.plot(nx, theta_prime_deg, 'k')
+plt.xlabel('x [m]')
+plt.ylabel("Hoek - \u03B8'(x) [deg]")
+plt.grid()
+
+plt.figure()
+plt.plot(nx, w_prime, 'k')
+plt.xlabel('x [m]')
+plt.ylabel("Doorbuiging - w'(x) [m]")
+plt.grid()
+
+plt.figure()
+plt.plot(nx, theta_deg, 'k')
+plt.xlabel('x [m]')
+plt.ylabel("Relatieve hoek - \u03B8(x) [deg]")
+plt.grid()
+
+plt.figure()
+plt.plot(nx, w, 'k')
+plt.xlabel('x [m]')
+plt.ylabel("relatieve doorbuiging - w(x) [m]")
+plt.grid()
+
 plt.show()
