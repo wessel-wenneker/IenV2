@@ -46,7 +46,7 @@ class DataLoader:
    - inlezen van CSV bestanden (met opschonen van kolomnamen)
    - bundelen van alle ingelezen data in een ShipInputs object
    """
-    def __init__(self, file, base_dir="data"):
+    def __init__(self, file, base_dir="Data"):
         """
        file : list[int]
            Bijvoorbeeld [98, 1, 0] -> Gr98_V1.0
@@ -54,7 +54,7 @@ class DataLoader:
            Map waar de data-bestanden staan.
        """
         self.file = file
-        self.base = Path(base_dir)                                  #omzetten base_dir naar een Path-object
+        self.base = Path(base_dir)                               #omzetten base_dir naar een Path-object
         self.group, self.vmax, self.vmin = file                     #splitsen file in groep, versie en subversie
         self.tag = f"Gr{self.group}_V{self.vmax}.{self.vmin}"       #bouwen van de 'tag' die in elke bestandsnaam zit
 
@@ -81,7 +81,8 @@ class DataLoader:
         Returns:
         Inhoud van de JSON als dictionary.
         """
-        with open(self.path(stem, "json"), "r", encoding="utf-8") as f:  #'r'--> read
+        with open(self.path(stem, "json"), "r", encoding="utf-8") as f: 
+            print(f)#'r'--> read
             return json.load(f)
 
     def read_custom(self, stem: str, skiprows: int = 1):
@@ -182,8 +183,8 @@ class DataLoader:
     
 def readGegeven(file):
     
-    data_antwoordenblad = json.load(open("data/Antwoordenblad_Gr98_V3.0.json"))
-    data_tanks = json.load(open("data/TankData_Gr98_V3.0.json"))
+    data_antwoordenblad = json.load(open("Data/Antwoordenblad_Gr98_V3.0.json"))
+    data_tanks = json.load(open("Data/TankData_Gr98_V3.0.json"))
     
     tank3_initial = data_tanks["WB TANK 3"]["Height_of_WB_%_of_h_tank"]
     hull_thickness =  np.array([0.010, data_antwoordenblad["Constructie"]["Huid_en_dek_dikte #[mm]"]/1000, data_antwoordenblad["Constructie"]["Huid_en_dek_dikte #[mm]"]/1000]) #[transom, shell, deck]

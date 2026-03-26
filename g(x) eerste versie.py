@@ -87,33 +87,33 @@ tank1_filling_percentages = df_watervolume_tank1["Tankfilling [% of h_tank]"].to
 tank2_filling_percentages = df_watervolume_tank2["Tankfilling [% of h_tank]"].to_numpy()
 tank3_filling_percentages = df_watervolume_tank3["Tankfilling [% of h_tank]"].to_numpy()
 
-shell = pd.read_csv('data/Shell_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+shell = pd.read_csv('Data/Shell_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 s_x = shell['X [m]'].to_numpy()
 s_outline = shell['OUTLINE LENGTH [m]'].to_numpy()
 s_CSA = shell['CROSS SECTION AREA OF SHELL PLATING [m2]'].to_numpy()
 
-tank1 = pd.read_csv('data/Tank1_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+tank1 = pd.read_csv('Data/Tank1_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 t1x = tank1['x_in_m'].to_numpy()
 t1CSA = tank1[' crossarea_in_m2'].to_numpy()
 
-tank2 = pd.read_csv('data/Tank2_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+tank2 = pd.read_csv('Data/Tank2_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 t2x = tank2['x_in_m'].to_numpy()
 t2CSA = tank2[' crossarea_in_m2'].to_numpy()
 
-tank3 = pd.read_csv('data/Tank3_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+tank3 = pd.read_csv('Data/Tank3_CSA_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 t3x = tank3['x_in_m'].to_numpy()
 t3CSA = tank3[' crossarea_in_m2'].to_numpy()
 
-hull = pd.read_csv('data/HullAreaData_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+hull = pd.read_csv('Data/HullAreaData_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 xtransom = hull[' lca [m]'][0]
 Ntransom = hull[' Area [m2]'][0]*metal_density*g
 
-BHD = pd.read_csv('data/TankBHD_Data_Gr98_V3.0.csv', delimiter=',', skiprows=1)
+BHD = pd.read_csv('Data/TankBHD_Data_Gr98_V3.0.csv', delimiter=',', skiprows=1)
 xminBHD = BHD[' x_min [m]'].to_numpy()
 xmaxBHD = BHD[' x_max [m]'].to_numpy()
 NBHD = BHD['BHD Area [m2]'].to_numpy()*metal_density*mass_factor*g
 
-deck = json.load(open('data/Antwoordenblad_Gr98V3.0.json'))
+deck = json.load(open('Data/Antwoordenblad_Gr98V3.0.json'))
 xcrane = deck['Zwaartepunten_kraanlast']['LCG_kraanhuis #[m]']
 TP_amount = deck['Deklast_transition_pieces']['Aantal_transition_pieces #[-]']
 keylist = list(deck['Lading_locaties'].keys())

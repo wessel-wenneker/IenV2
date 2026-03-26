@@ -20,7 +20,7 @@ from read import DataLoader
 class Ship:
     def __init__(self, file, crane_position, jib_length, TP_position, TP_amount, hull_thickness, BHD_thickness, tank3_initial, slewing_angle, jib_angle, TP_mass=230000, water_density=1025, material_density=7850, mass_factor=2.1):
         self.file = file
-        self.loader = DataLoader(self.file, base_dir="data")
+        self.loader = DataLoader(self.file)
         self.crane_position = crane_position
         self.jib_length = jib_length
         self.TP_position = TP_position
