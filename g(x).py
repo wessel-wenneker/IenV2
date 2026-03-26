@@ -255,6 +255,10 @@ Fs_balanced_arr = cumulative_trapezoid(q_balanced_arr, nx, initial=0)
 
 #  Stap 10: Momentenlijn
 Mx = cumulative_trapezoid(Fs_balanced_arr, nx, initial=0)
+moment_kraan = lengte_kraanarm * tp_wheight * math.cos(slewing_angle)*math.cos(jib_angle)
+for i in range(nx):
+    if nx >= x_kraan:
+        Mx[nx] += moment_kraan
 
 # Stap 11: Traagheidsmoment I(x) 
 s_Ix_ref = shell['INERTIA_X[m4]'].to_numpy()   # bij 1 mm referentiedikte
