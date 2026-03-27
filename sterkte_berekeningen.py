@@ -18,11 +18,22 @@ import os
 from read import DataLoader
 from Main import file, Ship #schip is berekende boot
 
+antwoordenblad = json.load(open("Data/Antwoordenblad_Gr98V3.0.json"))
+lengte_kraanarm = antwoordenblad["Kraan_beladingsconditie"]["Kraanboom_lengte #[m]"]
+tp_wheight = antwoordenblad["Kraan_beladingsconditie"]["Gewicht_per_TP #[N]"]
+aantal_tp = antwoordenblad["Kraan_beladingsconditie"]["Aantal_TP_in_kraan #[-]"]
+slewing_angle = antwoordenblad["Kraan_beladingsconditie"]["Zwenkhoek #[graden]"]
+jib_angle = antwoordenblad["Kraan_beladingsconditie"]["Giekhoek #[graden]"]
+x_kraan = antwoordenblad["Zwaartepunten_kraanlast"]["LCG_kraanhuis #[m]"]
 def computeQFsMbArrays(buoyancy_arr, g_arr,x):
     """Moet nog aanpassingen in om het moment van de kraan er in te krijgen als die er is!!"""
     q = g_arr + buoyancy_arr
     Fs = cumulative_trapezoid(q, x, initial=0)
     Mb = cumulative_trapezoid(Fs, x, initial=0)
+    moment_kraan = lengte_kraanarm * tp_wheight * aantal_tp * math.cos(slewing_angle) * math.cos(jib_angle)
+    for i in range(len(x)-1):
+        if x[i] >= x_kraan:
+            Mb[i] += moment_kraan
     return q, Fs, Mb
 
 def integrateTankCrossections():
