@@ -15,7 +15,7 @@ for d in dikte:
     if main(SOORT,d,i)[1].max_sigma_bodem_mpa > main(SOORT,d,i)[1].toelaatbare_spanning_mpa or main(SOORT,d,i)[1].max_sigma_dek_mpa > main(SOORT,d,i)[1].toelaatbare_spanning_mpa:
         continue
     for i in tank3:
-        if main(SOORT,d,i)[0]["tank1_percentage"] < 0 or main(SOORT,d,i)[0]["tank1_percentage"] > 100 or main(SOORT,d,i)[0]["tank2_percentage"] < 0 or main(SOORT,d,i)[0]["tank2_percentage"] > 100 or main(SOORT,d,i)[0]["gm"] < 0:
+        if main(SOORT,d,i)[0]["tank1_percentage"] < 0 or main(SOORT,d,i)[0]["tank1_percentage"] > 100 or main(SOORT,d,i)[0]["tank2_percentage"] < 0 or main(SOORT,d,i)[0]["tank2_percentage"] > 100 or main(SOORT,d,i)[0]["gm"] < 1:
             continue
         print(round(d,5), i)
         if not os.path.exists(f'output/{round(d,5)},{i}'):
