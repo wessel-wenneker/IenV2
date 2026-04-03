@@ -1,0 +1,10 @@
+16 i
+tank1 percentage: 66.3 %
+tank2 percentage: 69.2 %
+tank2 lcg: 34.8 m
+gm: 1.05 m
+
+Max buigspanning bodem: 30.7 MPa
+Max buigspanning dek: 29.9 MPa
+Toelaatbare spanning: 355 MPa
+Max doorbuiging: 9.7 mm

@@ -1,0 +1,84 @@
+{
+    "WB TANK 1": {
+        "Volume_water_ballast_m3": 1412.5588,
+        "COV_WB_m": [
+            71.1223,
+            8.4999,
+            1.6214
+        ],
+        "Height_of_WB_%_of_h_tank": 70.0,
+        "Tank_lxbxh_m": [
+            43.8773,
+            14.999,
+            4.9996
+        ],
+        "Area_WB_plane_m2": 364.3628,
+        "COA_WB_plane_m": [
+            71.5429,
+            9.5669,
+            3.4991
+        ],
+        "Inertia_WB_plane_m4": [
+            2855.4661,
+            45647.4427,
+            48502.9088
+        ]
+    },
+    "WB TANK 2": {
+        "Volume_WB_m3": 1150.7387,
+        "COV_WB_m": [
+            72.5309,
+            0.0,
+            2.6923
+        ],
+        "Height_of_WB_%_of_h_tank": 84.6343,
+        "Tank_lxbxh_m": [
+            34.0,
+            10.0,
+            3.999
+        ],
+        "Area_WB_plane_m2": 340.0,
+        "COA_WB_plane_m": [
+            72.5309,
+            0.0,
+            4.3845
+        ],
+        "Inertia_WB_plane_m4": [
+            2833.3333,
+            32753.3333,
+            35586.6667
+        ]
+    },
+    "WB TANK 3": {
+        "Volume_water_ballast_m3": 1412.5588,
+        "COV_WB_m": [
+            71.1223,
+            -8.4999,
+            1.6214
+        ],
+        "Height_of_WB_%_of_h_tank": 70.0,
+        "Tank_lxbxh_m": [
+            43.8773,
+            14.999,
+            4.9996
+        ],
+        "Area_WB_plane_m2": 364.3628,
+        "COA_WB_plane_m": [
+            71.5429,
+            -9.5669,
+            3.4991
+        ],
+        "Inertia_WB_plane_m4": [
+            2855.4661,
+            45647.4427,
+            48502.9088
+        ]
+    },
+    "_export_info": {
+        "created": "2026-03-31T17:18:19.200637+02:00",
+        "source_file": "MT1463_HullGenerator_V3.34_Gr98V2.0.gh",
+        "group": 98.0,
+        "version": 2,
+        "subversion": 0.0
+    }
+}

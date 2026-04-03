@@ -1,0 +1,66 @@
+{
+    "MAIN DIMENSIONS": {
+        "Loa_m": 100.0,
+        "B_m": 29.998,
+        "H_m": 4.999,
+        "Lpp_m": 97.9054,
+        "Lwl_m": 98.1428,
+        "X_midship_aft_m": 61.1909,
+        "X_midship_fwd_m": 66.0862,
+        "Bilge_Radius_m": 0.8
+    },
+    "DRAUGHT DATA": {
+        "T_moulded_m": 3.199,
+        "T_aft_m": 3.199,
+        "T_fwd_m": 3.199,
+        "heel_deg": 0.0
+    },
+    "WATERLINE ENTRANCE ANGLE": {
+        "Waterline_Entrace_angle_deg": 59.827,
+        "Location_of_WEA_%Bwl": 30.0,
+        "XYZ_location_of_WEA_m": [
+            96.4701,
+            4.4997,
+            3.199
+        ]
+    },
+    "VOLUME RELATED DATA (MOULDED)": {
+        "Buoyant_Volume_m3": 6553.1174,
+        "Total_Volume_m3": 11224.1149,
+        "COB_m": [
+            55.0818,
+            0.0,
+            1.7676
+        ],
+        "COV_Total_m": [
+            52.1999,
+            0.0,
+            2.7387
+        ],
+        "Cb_pp": 0.6975,
+        "Cb_wl": 0.6958
+    },
+    "DATA OF UNDERWATER AREAS (MOULDED)": {
+        "Water_Plane_Area_m2": 2544.3803,
+        "COF_m": [
+            48.8863,
+            0.0,
+            3.199
+        ],
+        "Inertia_WPA_around_COF_m4": [
+            157379.0519,
+            1713634.1562,
+            1871013.2081
+        ],
+        "Wetted_Shell_Area_m2": 2939.1175,
+        "Wetted_Transom_Area_m2": 0.0,
+        "Am_m2": 95.6881
+    },
+    "_export_info": {
+        "created": "2026-03-31T17:18:19.185287+02:00",
+        "source_file": "MT1463_HullGenerator_V3.34_Gr98V2.0.gh",
+        "group": 98.0,
+        "version": 2,
+        "subversion": 0.0
+    }
+}
