@@ -1,0 +1,36 @@
+{
+    "INPUT DATA": {
+        "Loa_m": 70.0,
+        "Boa_m": 20.0,
+        "Doa_m": 13.0,
+        "Tm_m": 9.999,
+        "Location_factor_App": 0.94,
+        "%_Length_aft_Shoulder_pct": 49.0,
+        "Midship_Length_m": 24.8724,
+        "Location_of_midship_%_of_Lpp": 50.0,
+        "Bilge_Radius_m": 1.0,
+        "%_Length_fwd_shoulder_pct": 38.0,
+        "Location_of_bow_intermediate_curve_pct": 61.0,
+        "Bow_rounding_value_deg": 46.0,
+        "heel_deg": 0.0,
+        "trim_deg": 0.0,
+        "mean_shell_thickness_mm": 1.0,
+        "Number_of_ordinates": 8.0,
+        "number_of_waterlines": 4.0,
+        "number_of_buttocks": 4.0,
+        "Entrance_angle_factor_%_of_Bwl": 30.0,
+        "X_division_method": 1.0,
+        "Flip_loft_surface": 0.0,
+        "Filling_Tank_1_%h1": 59.322,
+        "Filling_Tank_2_%h2": 85.1747,
+        "Filling_Tank_3_%h3": 72.0,
+        "Toggle_1_ship/0_barge": 1.0
+    },
+    "_export_info": {
+        "created": "2026-03-31T16:11:34.475139+02:00",
+        "source_file": "MT1463_HullGenerator_V3.34_Gr98V1.0.gh",
+        "group": 98.0,
+        "version": 1,
+        "subversion": 0.0
+    }
+}

@@ -209,22 +209,24 @@ def voegDekladingToe(
     x_fijn: np.ndarray,
     antwoordenblad: dict,
     schip,
+    TP_aantal,
+    kraan_positie
 ) -> None:
     """Voegt transition pieces en eventueel een kraanlast toe."""
     sleutel_lijst = list(antwoordenblad["Lading_locaties"].keys())
-    for index in range(antwoordenblad["Deklast_transition_pieces"]["Aantal_transition_pieces #[-]"]):
+    for index in range(TP_aantal):
         x_tp = antwoordenblad["Lading_locaties"][sleutel_lijst[index]]["LCG #[m]"]
         voegHalveCirkelLastToe(totale_neerwaartse_belasting, x_fijn, x_tp, 4, 230000 * ZWAARTEKRACHT)
     if schip.kraan_positie is not None:
-        x_kraan = antwoordenblad["Zwaartepunten_kraanlast"]["LCG_kraanhuis #[m]"]
+        x_kraan = kraan_positie[0]
         voegHalveCirkelLastToe(totale_neerwaartse_belasting, x_fijn, x_kraan, 1, 230000 * ZWAARTEKRACHT)
 
 
-def bouwBasisBelasting(brondata: SterkteBrondata, schip) -> dict:
+def bouwBasisBelasting(brondata: SterkteBrondata, schip, dikte,TP_aantal,kraan_positie) -> dict:
     """Bouwt de eerste neerwaartse en opwaartse belastingverdelingen op."""
     shell = brondata.df_shell_csa
     x_fijn = np.linspace(shell["X [m]"].to_numpy()[0], shell["X [m]"].to_numpy()[-1], 10000)
-    shell_thickness_mm = brondata.antwoordenblad["Constructie"]["Huid_en_dek_dikte #[mm]"]
+    shell_thickness_mm = dikte*1000
     huid_belasting = interpoleerLijn(
         shell["X [m]"].to_numpy(),
         shell["CROSS SECTION AREA OF SHELL PLATING [m2]"].to_numpy(),
@@ -236,7 +238,7 @@ def bouwBasisBelasting(brondata: SterkteBrondata, schip) -> dict:
     neerwaartse_tank3 = interpoleerLijn(brondata.df_tank3_csa["x_in_m"].to_numpy(), brondata.df_tank3_csa["crossarea_in_m2"].to_numpy(), x_fijn) * schip.water_dichtheid * ZWAARTEKRACHT
     totale_neerwaartse_belasting = neerwaartse_huid + neerwaartse_tank1 + neerwaartse_tank2 + neerwaartse_tank3
     voegSpiegelEnSchottenToe(totale_neerwaartse_belasting, x_fijn, brondata, schip)
-    voegDekladingToe(totale_neerwaartse_belasting, x_fijn, brondata.antwoordenblad, schip)
+    voegDekladingToe(totale_neerwaartse_belasting, x_fijn, brondata.antwoordenblad, schip,TP_aantal,kraan_positie)
     opwaartse_belasting_fijn = np.interp(
         x_fijn,
         brondata.df_buoyant_csa["x_in_m"].to_numpy(),
@@ -258,6 +260,7 @@ def bouwGebalanceerdeBelasting(
     schip,
     basis_belasting: dict,
     evenwicht: EvenwichtsResultaat,
+    TP_aantal,kraan_positie
 ) -> np.ndarray:
     """Past de tankbelastingen aan op basis van het berekende evenwicht."""
     initieel_volume_tank1 = trapezoid(brondata.df_tank1_csa["crossarea_in_m2"].to_numpy(), brondata.df_tank1_csa["x_in_m"].to_numpy())
@@ -271,7 +274,7 @@ def bouwGebalanceerdeBelasting(
     totale_neerwaartse_belasting += basis_belasting["neerwaartse_tank1"] * factor_tank1
     totale_neerwaartse_belasting += basis_belasting["neerwaartse_tank2"] * factor_tank2
     totale_neerwaartse_belasting += basis_belasting["neerwaartse_tank3"] * factor_tank3
-    voegDekladingToe(totale_neerwaartse_belasting, basis_belasting["x_fijn"], brondata.antwoordenblad, schip)
+    voegDekladingToe(totale_neerwaartse_belasting, basis_belasting["x_fijn"], brondata.antwoordenblad, schip,TP_aantal,kraan_positie)
     return totale_neerwaartse_belasting
 
 
@@ -280,15 +283,16 @@ def berekenMomentlijn(
     schip,
     x_fijn: np.ndarray,
     dwarskrachtlijn: np.ndarray,
+    kraan_positie,giek_lengte,giek_hoek,zwenk_hoek
 ) -> np.ndarray:
     """Integreert de dwarskrachtlijn en voegt optioneel een kraanmoment toe."""
     momentlijn = cumulative_trapezoid(dwarskrachtlijn, x_fijn, initial=0)
     if schip.kraan_positie is None:
         return momentlijn
-    x_kraan = antwoordenblad["Zwaartepunten_kraanlast"]["LCG_kraanhuis #[m]"]
-    giek_lengte = antwoordenblad["Kraan_beladingsconditie"]["Kraanboom_lengte #[m]"]
-    giek_hoek = math.radians(antwoordenblad["Kraan_beladingsconditie"]["Giekhoek #[graden]"])
-    zwenk_hoek = math.radians(antwoordenblad["Kraan_beladingsconditie"]["Zwenkhoek #[graden]"])
+    x_kraan = kraan_positie[0]
+    giek_lengte = giek_lengte
+    giek_hoek = math.radians(giek_hoek)
+    zwenk_hoek = math.radians(zwenk_hoek)
     x_last = x_kraan + giek_lengte * math.cos(giek_hoek) * math.cos(zwenk_hoek)
     kraanmoment = 230000 * ZWAARTEKRACHT * (x_last - x_kraan)
     if abs(kraanmoment) > 1e3:
@@ -301,10 +305,11 @@ def berekenSpanningsLijnen(
     brondata: SterkteBrondata,
     x_fijn: np.ndarray,
     momentlijn: np.ndarray,
+    dikte
 ) -> dict:
     """Berekent I(x), EI(x), sigma(x) en de afgeleide lijnen."""
     shell = brondata.df_shell_csa
-    shell_thickness_mm = brondata.antwoordenblad["Constructie"]["Huid_en_dek_dikte #[mm]"]
+    shell_thickness_mm = dikte*1000
     traagheidsmoment_lijn = interpoleerLijn(shell["X [m]"].to_numpy(), shell["INERTIA_Y[m4]"].to_numpy() * shell_thickness_mm, x_fijn)
     traagheidsmoment_lijn = np.maximum(traagheidsmoment_lijn, 0.01)
     buigstijfheid_lijn = ELASTICITEITSMODULUS * traagheidsmoment_lijn
@@ -339,10 +344,10 @@ def berekenDoorbuiging(
     return hoekverdraaiing_lijn, doorbuiging_lijn
 
 
-def berekenLangsscheepseSterkte(bestandscode: list[int], schip) -> SterkteResultaat:
+def berekenLangsscheepseSterkte(bestandscode: list[int], schip,dikte,TP_aantal,kraan_positie,giek_lengte,giek_hoek,zwenk_hoek) -> SterkteResultaat:
     """Berekent alle lijnen en samenvattende waarden voor de langsscheepse sterkte."""
     brondata = leesSterkteBrondata(bestandscode)
-    basis_belasting = bouwBasisBelasting(brondata, schip)
+    basis_belasting = bouwBasisBelasting(brondata, schip,dikte,TP_aantal,kraan_positie)
     q_evenwicht = trapezoid(basis_belasting["totale_neerwaartse_belasting"], basis_belasting["x_fijn"])
     q_evenwicht += trapezoid(basis_belasting["opwaartse_belasting_fijn"], basis_belasting["x_fijn"])
     evenwicht = bepaalTankEvenwicht(
@@ -355,14 +360,14 @@ def berekenLangsscheepseSterkte(bestandscode: list[int], schip) -> SterkteResult
         initieel_volume_tank3=trapezoid(brondata.df_tank3_csa["crossarea_in_m2"].to_numpy(), brondata.df_tank3_csa["x_in_m"].to_numpy()),
         water_dichtheid=schip.water_dichtheid,
     )
-    neerwaartse_belasting = bouwGebalanceerdeBelasting(brondata, schip, basis_belasting, evenwicht)
+    neerwaartse_belasting = bouwGebalanceerdeBelasting(brondata, schip, basis_belasting, evenwicht,TP_aantal,kraan_positie)
     q_gebalanceerd = neerwaartse_belasting + basis_belasting["opwaartse_belasting_fijn"]
     dwarskrachtlijn = cumulative_trapezoid(q_gebalanceerd, basis_belasting["x_fijn"], initial=0)
-    momentlijn = berekenMomentlijn(brondata.antwoordenblad, schip, basis_belasting["x_fijn"], dwarskrachtlijn)
+    momentlijn = berekenMomentlijn(brondata.antwoordenblad, schip, basis_belasting["x_fijn"], dwarskrachtlijn,kraan_positie,giek_lengte,giek_hoek,zwenk_hoek)
     # Corrigeer de momentlijn: voor een vrij-vrij balk geldt M=0 aan beide uiteinden
     lineaire_correctie = momentlijn[-1] * (basis_belasting["x_fijn"] - basis_belasting["x_fijn"][0]) / (basis_belasting["x_fijn"][-1] - basis_belasting["x_fijn"][0])
     momentlijn = momentlijn - lineaire_correctie
-    spannings_lijnen = berekenSpanningsLijnen(brondata, basis_belasting["x_fijn"], momentlijn)
+    spannings_lijnen = berekenSpanningsLijnen(brondata, basis_belasting["x_fijn"], momentlijn,dikte)
     hoekverdraaiing_lijn, doorbuiging_lijn = berekenDoorbuiging(
         basis_belasting["x_fijn"],
         spannings_lijnen["gereduceerd_moment_lijn"],
