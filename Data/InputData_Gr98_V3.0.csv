@@ -1,0 +1,28 @@
+INPUT DATA Group 98; Version 3.0
+Loa [m],150
+Boa [m],18
+Doa [m],8
+Tm [m],4.999
+Location factor App [-],0.98
+% Length aft Shoulder [%],50
+Midship Length [m],52.0104
+Location of midship [% of Lpp],48
+Bilge Radius [m],5.2
+% Length fwd shoulder [%],30
+Location of bow intermediate curve [%],55
+Bow rounding value [deg],1
+heel [deg],0
+trim [deg],0
+mean shell thickness [mm],1
+Number of ordinates [-],24
+number of waterlines [-],8
+number of buttocks [-],8
+Entrance angle factor [% of Bwl],30
+X division method [-],1
+Flip loft surface [-],0
+Filling Tank 1 [%h1],50
+Filling Tank 2 [%h2],88.5744
+Filling Tank 3 [%h3],50
+Toggle 1_ship/0_barge [-],1
+WARNING: The Z value of point 1-3 of the bow intermediate curve is not zero
+

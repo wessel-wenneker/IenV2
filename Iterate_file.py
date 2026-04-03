@@ -1,4 +1,5 @@
 from pathlib import Path
+import pandas as pd
 import numpy as np
 import os
 
@@ -7,10 +8,10 @@ from langsscheepse_sterkte import toonSterkteGrafieken
 
 from input_file import SOORT, BESTANDSCODE
 
-dikte = np.arange(0.008,0.025,0.001) #huiddikte array
-i = 1 #tank3 start value
-tank3 = np.arange(i,100,1) #tank3 initial array
-
+dikte = np.arange(0.008,0.011,0.001) #huiddikte array
+i = 60 #tank3 start value
+tank3 = np.arange(i,66,1) #tank3 initial array
+resultaten = []
 for d in dikte:
     if main(SOORT,d,i)[1].max_sigma_bodem_mpa > main(SOORT,d,i)[1].toelaatbare_spanning_mpa or main(SOORT,d,i)[1].max_sigma_dek_mpa > main(SOORT,d,i)[1].toelaatbare_spanning_mpa:
         continue
@@ -36,4 +37,17 @@ for d in dikte:
             f.write(f"Max buigspanning dek: {main(SOORT,d,i)[1].max_sigma_dek_mpa:.1f} MPa\n")
             f.write(f"Toelaatbare spanning: {main(SOORT,d,i)[1].toelaatbare_spanning_mpa} MPa\n")
             f.write(f"Max doorbuiging: {main(SOORT,d,i)[1].max_doorbuiging_mm:.1f} mm\n")
+        resultaten.append({
+                "dikte": d,
+                "tank3_initial": i,
+                "tank1_percentage": main(SOORT,d,i)[0]["tank1_percentage"],
+                "tank2_percentage": main(SOORT,d,i)[0]["tank2_percentage"],
+                'tank2_lcg': main(SOORT,d,i)[0]["tank2_lcg"],
+                "gm": main(SOORT,d,i)[0]["gm"],
+                "max_sigma_bodem_mpa": main(SOORT,d,i)[1].max_sigma_bodem_mpa,
+                'max_buigspanning_dek_mpa': main(SOORT,d,i)[1].max_sigma_dek_mpa,
+                "toelaatbare_spanning_mpa": main(SOORT,d,i)[1].toelaatbare_spanning_mpa,
+                'max_doorbuiging_mm': main(SOORT,d,i)[1].max_doorbuiging_mm,})
+df = pd.DataFrame(resultaten)
+df.to_excel(f"output/{BESTANDSCODE[0]},{BESTANDSCODE[1]},{BESTANDSCODE[2]}/info.xlsx", index=False)
         
