@@ -3,14 +3,14 @@ import pandas as pd
 import numpy as np
 import os
 
-from main import main, run, toonStabiliteitsSamenvatting, toonSterkteSamenvatting
+from main import main, run, toonStabiliteitsSamenvatting, toonSterkteSamenvatting, toonOverigePunten
 from langsscheepse_sterkte import toonSterkteGrafieken
 
 from input_file import SOORT, BESTANDSCODE
 
-dikte = np.arange(0.008,0.013,0.001) #huiddikte  [m]
-i = 0 #tank3 start value
-tank3 = np.arange(i,101,1) #tank3 initial array
+dikte = np.arange(0.008,0.009,0.001) #huiddikte  [m]
+i = 25 #tank3 start value
+tank3 = np.arange(i,30,1) #tank3 initial array
 resultaten = []
 for d in dikte:
     if main(SOORT,d,i)[1].max_sigma_bodem_mpa > main(SOORT,d,i)[1].toelaatbare_spanning_mpa or main(SOORT,d,i)[1].max_sigma_dek_mpa > main(SOORT,d,i)[1].toelaatbare_spanning_mpa:
@@ -23,6 +23,7 @@ for d in dikte:
             os.makedirs(f'output/{BESTANDSCODE[0]},{BESTANDSCODE[1]},{BESTANDSCODE[2]}/{round(1000*d)},{i}')
         toonStabiliteitsSamenvatting(main(SOORT,d,i)[2])
         toonSterkteSamenvatting(main(SOORT,d,i)[1])
+        toonOverigePunten(main(SOORT,d,i)[2])
         toonSterkteGrafieken(main(SOORT,d,i)[1], save_map=Path(__file__).resolve().parent / f"output/{BESTANDSCODE[0]},{BESTANDSCODE[1]},{BESTANDSCODE[2]}/{round(1000*d)},{i}")
         os.path.join(f'output/{BESTANDSCODE[0]},{BESTANDSCODE[1]},{BESTANDSCODE[2]}/{round(1000*d)},{i}', 'info.txt')
         with open(f'output/{BESTANDSCODE[0]},{BESTANDSCODE[1]},{BESTANDSCODE[2]}/{round(1000*d)},{i}/info.txt', "w") as f:

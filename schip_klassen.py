@@ -158,6 +158,7 @@ class Schip:
             "tank2_percentage": self.tank2_percentage,
             "tank2_lcg": self.tank2_lcg,
             "gm": self.gm,
+            "dry_mass": self.droge_massa
         }
 
 

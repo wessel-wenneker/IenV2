@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import pandas as pd
 from pathlib import Path
 
 import matplotlib
@@ -30,13 +31,19 @@ def toonStabiliteitsSamenvatting(schip) -> None:
     print(f'gm: {samenvatting["gm"]:.2f} m')
     print()
 
-
 def toonSterkteSamenvatting(resultaat) -> None:
     """Print de belangrijkste sterkte-uitkomsten buiten de rekendelen."""
     print(f"Max buigspanning bodem: {resultaat.max_sigma_bodem_mpa:.1f} MPa")
     print(f"Max buigspanning dek: {resultaat.max_sigma_dek_mpa:.1f} MPa")
     print(f"Toelaatbare spanning: {resultaat.toelaatbare_spanning_mpa} MPa")
     print(f"Max doorbuiging: {resultaat.max_doorbuiging_mm:.1f} mm")
+    print()
+
+def toonOverigePunten(schip) -> None:
+    """Print de belangrijkste stabiliteitsuitkomsten buiten de klassen."""
+    samenvatting = schip.geefSamenvatting()
+    print(f'Scheepsmassa: {samenvatting["dry_mass"]:.1f} kg')
+    print(f'Transition pieces: {TP_AANTAL}')
     print()
     print()
 
@@ -97,4 +104,5 @@ def run(soort, huiddikte, tank3_vulling):
     _,resultaat, schip = main(soort, huiddikte, tank3_vulling)
     toonStabiliteitsSamenvatting(schip)
     toonSterkteSamenvatting(resultaat)
+    toonOverigePunten(schip)
     toonSterkteGrafieken(resultaat, save_map=Path(__file__).resolve().parent / "output")
