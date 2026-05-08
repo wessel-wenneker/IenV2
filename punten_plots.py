@@ -11,7 +11,7 @@ import numpy as np
 
 
 DATA_MAP = Path(__file__).resolve().parent / "Data"
-EERSTE_ANTWOORDBLAD = DATA_MAP / "Antwoordenblad_Gr98_V1.0.json"
+EERSTE_ANTWOORDBLAD = DATA_MAP / "Antwoordenblad_Gr98V1.0.json"
 TWEEDE_ANTWOORDBLAD = DATA_MAP / "Antwoordenblad_Gr98V2.0.json"
 
 

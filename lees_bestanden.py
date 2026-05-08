@@ -129,14 +129,3 @@ class DataLoader:
     def leesAangepasteCsv(self, stam: str, skiprows: int = 1) -> pd.DataFrame:
         """Leest een extra CSV-bestand in dat dezelfde naamstructuur gebruikt."""
         return self.leesCsv(stam, skiprows=skiprows)
-
-
-def leesAntwoordenblad(
-    bestandscode: list[int],
-    basis_map: Path | str = BASIS_DATA_MAP,
-) -> dict:
-    """Leest het antwoordenblad van de opgegeven groep en versie in."""
-    groep, versie, subversie = bestandscode
-    pad = Path(basis_map) / f"Antwoordenblad_Gr{groep}V{versie}.{subversie}.json"
-    with pad.open("r", encoding="utf-8") as bestand:
-        return json.load(bestand)

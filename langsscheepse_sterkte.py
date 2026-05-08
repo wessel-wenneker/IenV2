@@ -12,7 +12,7 @@ import pandas as pd
 from scipy.integrate import cumulative_trapezoid, trapezoid
 from scipy.interpolate import CubicSpline, interp1d
 
-from lees_bestanden import DataLoader, leesAntwoordenblad
+from lees_bestanden import DataLoader
 
 
 ZWAARTEKRACHT = 9.81
@@ -47,7 +47,6 @@ class SterkteBrondata:
     df_tank1_volume: pd.DataFrame
     df_tank2_volume: pd.DataFrame
     df_tank3_volume: pd.DataFrame
-    antwoordenblad: dict
 
 
 @dataclass
@@ -125,7 +124,6 @@ def leesSterkteBrondata(bestandscode: list[int]) -> SterkteBrondata:
         df_tank1_volume=standaard_data.df_tank1,
         df_tank2_volume=standaard_data.df_tank2,
         df_tank3_volume=standaard_data.df_tank3,
-        antwoordenblad=leesAntwoordenblad(bestandscode),
     )
 
 
@@ -207,22 +205,21 @@ def voegSpiegelEnSchottenToe(
 def voegDekladingToe(
     totale_neerwaartse_belasting: np.ndarray,
     x_fijn: np.ndarray,
-    antwoordenblad: dict,
     schip,
+    TP_spositie,
     TP_aantal,
     kraan_positie
 ) -> None:
     """Voegt transition pieces en eventueel een kraanlast toe."""
-    sleutel_lijst = list(antwoordenblad["Lading_locaties"].keys())
     for index in range(TP_aantal):
-        x_tp = antwoordenblad["Lading_locaties"][sleutel_lijst[index]]["LCG #[m]"]
+        x_tp = TP_spositie[index][0]
         voegHalveCirkelLastToe(totale_neerwaartse_belasting, x_fijn, x_tp, 4, 230000 * ZWAARTEKRACHT)
     if schip.kraan_positie is not None:
         x_kraan = kraan_positie[0]
         voegHalveCirkelLastToe(totale_neerwaartse_belasting, x_fijn, x_kraan, 1, 230000 * ZWAARTEKRACHT)
 
 
-def bouwBasisBelasting(brondata: SterkteBrondata, schip, dikte,TP_aantal,kraan_positie) -> dict:
+def bouwBasisBelasting(brondata: SterkteBrondata, schip, dikte,TP_spositie,TP_aantal,kraan_positie) -> dict:
     """Bouwt de eerste neerwaartse en opwaartse belastingverdelingen op."""
     shell = brondata.df_shell_csa
     x_fijn = np.linspace(shell["X [m]"].to_numpy()[0], shell["X [m]"].to_numpy()[-1], 10000)
@@ -238,7 +235,7 @@ def bouwBasisBelasting(brondata: SterkteBrondata, schip, dikte,TP_aantal,kraan_p
     neerwaartse_tank3 = interpoleerLijn(brondata.df_tank3_csa["x_in_m"].to_numpy(), brondata.df_tank3_csa["crossarea_in_m2"].to_numpy(), x_fijn) * schip.water_dichtheid * ZWAARTEKRACHT
     totale_neerwaartse_belasting = neerwaartse_huid + neerwaartse_tank1 + neerwaartse_tank2 + neerwaartse_tank3
     voegSpiegelEnSchottenToe(totale_neerwaartse_belasting, x_fijn, brondata, schip)
-    voegDekladingToe(totale_neerwaartse_belasting, x_fijn, brondata.antwoordenblad, schip,TP_aantal,kraan_positie)
+    voegDekladingToe(totale_neerwaartse_belasting, x_fijn, schip,TP_spositie,TP_aantal,kraan_positie)
     opwaartse_belasting_fijn = np.interp(
         x_fijn,
         brondata.df_buoyant_csa["x_in_m"].to_numpy(),
@@ -260,6 +257,7 @@ def bouwGebalanceerdeBelasting(
     schip,
     basis_belasting: dict,
     evenwicht: EvenwichtsResultaat,
+    TP_spositie,
     TP_aantal,kraan_positie
 ) -> np.ndarray:
     """Past de tankbelastingen aan op basis van het berekende evenwicht."""
@@ -274,12 +272,11 @@ def bouwGebalanceerdeBelasting(
     totale_neerwaartse_belasting += basis_belasting["neerwaartse_tank1"] * factor_tank1
     totale_neerwaartse_belasting += basis_belasting["neerwaartse_tank2"] * factor_tank2
     totale_neerwaartse_belasting += basis_belasting["neerwaartse_tank3"] * factor_tank3
-    voegDekladingToe(totale_neerwaartse_belasting, basis_belasting["x_fijn"], brondata.antwoordenblad, schip,TP_aantal,kraan_positie)
+    voegDekladingToe(totale_neerwaartse_belasting, basis_belasting["x_fijn"], schip,TP_spositie,TP_aantal,kraan_positie)
     return totale_neerwaartse_belasting
 
 
 def berekenMomentlijn(
-    antwoordenblad: dict,
     schip,
     x_fijn: np.ndarray,
     dwarskrachtlijn: np.ndarray,
@@ -344,10 +341,10 @@ def berekenDoorbuiging(
     return hoekverdraaiing_lijn, doorbuiging_lijn
 
 
-def berekenLangsscheepseSterkte(bestandscode: list[int], schip,dikte,TP_aantal,kraan_positie,giek_lengte,giek_hoek,zwenk_hoek) -> SterkteResultaat:
+def berekenLangsscheepseSterkte(bestandscode: list[int], schip,dikte,TP_spositie,TP_aantal,kraan_positie,giek_lengte,giek_hoek,zwenk_hoek) -> SterkteResultaat:
     """Berekent alle lijnen en samenvattende waarden voor de langsscheepse sterkte."""
     brondata = leesSterkteBrondata(bestandscode)
-    basis_belasting = bouwBasisBelasting(brondata, schip,dikte,TP_aantal,kraan_positie)
+    basis_belasting = bouwBasisBelasting(brondata, schip,dikte,TP_spositie,TP_aantal,kraan_positie)
     q_evenwicht = trapezoid(basis_belasting["totale_neerwaartse_belasting"], basis_belasting["x_fijn"])
     q_evenwicht += trapezoid(basis_belasting["opwaartse_belasting_fijn"], basis_belasting["x_fijn"])
     evenwicht = bepaalTankEvenwicht(
@@ -360,10 +357,10 @@ def berekenLangsscheepseSterkte(bestandscode: list[int], schip,dikte,TP_aantal,k
         initieel_volume_tank3=trapezoid(brondata.df_tank3_csa["crossarea_in_m2"].to_numpy(), brondata.df_tank3_csa["x_in_m"].to_numpy()),
         water_dichtheid=schip.water_dichtheid,
     )
-    neerwaartse_belasting = bouwGebalanceerdeBelasting(brondata, schip, basis_belasting, evenwicht,TP_aantal,kraan_positie)
+    neerwaartse_belasting = bouwGebalanceerdeBelasting(brondata, schip, basis_belasting, evenwicht,TP_spositie,TP_aantal,kraan_positie)
     q_gebalanceerd = neerwaartse_belasting + basis_belasting["opwaartse_belasting_fijn"]
     dwarskrachtlijn = cumulative_trapezoid(q_gebalanceerd, basis_belasting["x_fijn"], initial=0)
-    momentlijn = berekenMomentlijn(brondata.antwoordenblad, schip, basis_belasting["x_fijn"], dwarskrachtlijn,kraan_positie,giek_lengte,giek_hoek,zwenk_hoek)
+    momentlijn = berekenMomentlijn(schip, basis_belasting["x_fijn"], dwarskrachtlijn,kraan_positie,giek_lengte,giek_hoek,zwenk_hoek)
     # Corrigeer de momentlijn: voor een vrij-vrij balk geldt M=0 aan beide uiteinden
     lineaire_correctie = momentlijn[-1] * (basis_belasting["x_fijn"] - basis_belasting["x_fijn"][0]) / (basis_belasting["x_fijn"][-1] - basis_belasting["x_fijn"][0])
     momentlijn = momentlijn - lineaire_correctie

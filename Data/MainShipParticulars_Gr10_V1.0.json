@@ -1,0 +1,66 @@
+{
+    "MAIN DIMENSIONS": {
+        "Loa_m": 75.0,
+        "B_m": 29.998,
+        "H_m": 4.999,
+        "Lpp_m": 70.3905,
+        "Lwl_m": 69.2578,
+        "X_midship_aft_m": 16.5418,
+        "X_midship_fwd_m": 34.1394,
+        "Bilge_Radius_m": 5.0
+    },
+    "DRAUGHT DATA": {
+        "T_moulded_m": 1.999,
+        "T_aft_m": 1.999,
+        "T_fwd_m": 1.999,
+        "heel_deg": 0.0
+    },
+    "WATERLINE ENTRANCE ANGLE": {
+        "Waterline_Entrace_angle_deg": 41.0404,
+        "Location_of_WEA_%Bwl": 30.0,
+        "XYZ_location_of_WEA_m": [
+            66.9875,
+            -4.4997,
+            1.999
+        ]
+    },
+    "VOLUME RELATED DATA (MOULDED)": {
+        "Buoyant_Volume_m3": 2401.7406,
+        "Total_Volume_m3": 7831.6383,
+        "COB_m": [
+            36.5476,
+            0.0,
+            1.1337
+        ],
+        "COV_Total_m": [
+            32.3676,
+            0.0,
+            2.7982
+        ],
+        "Cb_pp": 0.6152,
+        "Cb_wl": 0.6252
+    },
+    "DATA OF UNDERWATER AREAS (MOULDED)": {
+        "Water_Plane_Area_m2": 1588.7624,
+        "COF_m": [
+            33.015,
+            -0.0,
+            1.999
+        ],
+        "Inertia_WPA_around_COF_m4": [
+            81152.1004,
+            503258.0349,
+            584410.1353
+        ],
+        "Wetted_Shell_Area_m2": 1668.3897,
+        "Wetted_Transom_Area_m2": 0.0,
+        "Am_m2": 50.2301
+    },
+    "_export_info": {
+        "created": "2026-05-08T16:38:00.207794+02:00",
+        "source_file": "Kraanschip_Gr10_V1.0.gh",
+        "group": 10.0,
+        "version": 1,
+        "subversion": 0.0
+    }
+}
