@@ -1,0 +1,32 @@
+MAIN DIMENSIONS Group 10; Version 1.0
+Loa[m],75
+B[m],24.998
+H[m],7.499
+Lpp[m],70.3357
+Lwl[m],74.5239
+X midship aft[m],21.8744
+X midship fwd[m],48.4613
+Bilge Radius[m],1
+DRAUGHT DATA
+T moulded [m], 4.499
+T aft [m], 4.499
+T fwd [m], 4.499
+heel [deg], 0
+WATERLINE ENTRANCE ANGLE
+Waterline Entrace angle [deg], 62.0251
+Location of WEA [%Bwl], 30
+XYZ location of WEA [m], 69.0552, 3.7497, 4.499
+VOLUME RELATED DATA (MOULDED)
+Buoyant Volume [m3], 6766.5925
+Total Volume [m3], 11949.7719
+COB [m], 34.3633, 0, 2.3918
+COV Total [m], 33.2026, 0, 3.9577
+Cb_pp [-], 0.8554
+Cb_wl [-], 0.8073
+DATA OF UNDERWATER AREAS (MOULDED)
+Water Plane Area [m2], 1713.4489
+COF [m], 31.7097, 0, 4.499
+Inertia WPA around COF [m4], 80838.8795, 696560.4982, 777399.3777
+Wetted Shell Area [m2], 2233.9405
+Wetted Transom Area [m2], 7.4541
+Am [m2], 112.0356

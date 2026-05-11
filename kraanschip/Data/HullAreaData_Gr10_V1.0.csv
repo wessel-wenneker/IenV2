@@ -1,0 +1,5 @@
+HULL AREA DATA Group 10; Version 1.0
+Name , Area [m2], lca [m], tca [m], vca [m]
+Transom Area , 66.0534, -4.4895, 0, 5.8405
+Shell Area , 2723.5364, 33.3146, 0, 1.9207
+Deck Area , 1736.2776, 31.751, 0, 7.499

@@ -1,0 +1,84 @@
+{
+    "WB TANK 1": {
+        "Volume_water_ballast_m3": 1482.7052,
+        "COV_WB_m": [
+            22.6677,
+            7.7654,
+            2.4018
+        ],
+        "Height_of_WB_%_of_h_tank": 59.322,
+        "Tank_lxbxh_m": [
+            45.9045,
+            9.149,
+            7.499
+        ],
+        "Area_WB_plane_m2": 395.4166,
+        "COA_WB_plane_m": [
+            19.5613,
+            7.7077,
+            4.4486
+        ],
+        "Inertia_WB_plane_m4": [
+            2591.184,
+            65115.4174,
+            67706.6014
+        ]
+    },
+    "WB TANK 2": {
+        "Volume_WB_m3": 1455.0121,
+        "COV_WB_m": [
+            33.9131,
+            -0.0,
+            3.1936
+        ],
+        "Height_of_WB_%_of_h_tank": 85.1747,
+        "Tank_lxbxh_m": [
+            34.0,
+            6.7,
+            7.499
+        ],
+        "Area_WB_plane_m2": 227.8,
+        "COA_WB_plane_m": [
+            33.9131,
+            -0.0,
+            6.3873
+        ],
+        "Inertia_WB_plane_m4": [
+            852.1618,
+            21944.7333,
+            22796.8952
+        ]
+    },
+    "WB TANK 3": {
+        "Volume_water_ballast_m3": 1860.8347,
+        "COV_WB_m": [
+            22.011,
+            -7.7561,
+            2.9145
+        ],
+        "Height_of_WB_%_of_h_tank": 72.0,
+        "Tank_lxbxh_m": [
+            45.9045,
+            9.149,
+            7.499
+        ],
+        "Area_WB_plane_m2": 399.2811,
+        "COA_WB_plane_m": [
+            19.3523,
+            -7.7291,
+            5.3993
+        ],
+        "Inertia_WB_plane_m4": [
+            2612.0601,
+            66922.0051,
+            69534.0652
+        ]
+    },
+    "_export_info": {
+        "created": "2026-05-11T14:10:03.797862+02:00",
+        "source_file": "Kraanschip_Gr10_V1.0.gh",
+        "group": 10.0,
+        "version": 1,
+        "subversion": 0.0
+    }
+}
